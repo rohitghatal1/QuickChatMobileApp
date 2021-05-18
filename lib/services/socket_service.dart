@@ -46,7 +46,6 @@ class SocketService {
     socket?.emit('leave_room', roomId);
   }
 
-
   // Cleanup
   void dispose() {
     socket.disconnect();

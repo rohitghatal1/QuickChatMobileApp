@@ -63,7 +63,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 spacing: 20,
                 children: [
-                  Text(user!['name'][0], style: TextStyle(fontSize: 25),),
+                  Text(
+                    user!['name'][0],
+                    style: TextStyle(fontSize: 25),
+                  ),
                   Text(
                     user!['name'] ?? '',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -86,7 +89,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Icons.arrow_forward_ios,
                       size: 16,
                     ),
-
                     onTap: () async {
                       final updated = Navigator.push(
                         context,
@@ -98,7 +100,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                     },
                   ),
-
                   ListTile(
                     leading: Icon(Icons.person_outlined),
                     title: Text('Update Profile'),
