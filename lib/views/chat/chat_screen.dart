@@ -1,6 +1,3 @@
-// Updated ChatScreen with fixed dynamic typing and safe null checks
-// All usages of models are removed, and dynamic is used carefully
-
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -8,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_chat/services/socket_service.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
-import 'package:quick_chat/views/pages/CallingPage.dart';
 
 import '../../provider/UserProvider.dart';
 import '../../widgets/chat_bubble.dart';
@@ -101,8 +97,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     }
   }
 
-
-
 // Override didChangeDependencies to reinitialize socket when returning to screen
   @override
   void didChangeDependencies() {
@@ -111,9 +105,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     if (!_isSocketInitialized) {
       _initSocket();
     }
-
   }
-  
+
   void _onHorizontalDragUpdate(DragUpdateDetails details, dynamic message) {
     _dragExtent += details.primaryDelta ?? 0;
     if (_dragExtent > 60 && !_isReplyTriggered) {
@@ -230,8 +223,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _isSocketInitialized = false;
     // _socketService.dispose();
     super.dispose();
-
-
   }
 
   @override
@@ -244,7 +235,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         ? (widget.groupName ?? "Group Chat")
         : (widget.receiver?["username"] ?? 'Chat');
 
-    debugPrint("receiver data in chat screen ${widget.isGroup ? widget.groupName : widget.receiver }");
+    debugPrint(
+        "receiver data in chat screen ${widget.isGroup ? widget.groupName : widget.receiver}");
 
     return Scaffold(
       appBar: AppBar(
@@ -266,25 +258,26 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _messages.isEmpty
-                ? _buildEmptyChatState()
-                : ListView.builder(
-              controller: scrollController,
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                final isMe = message['sender']?['_id'] == userData['_id'];
+                    ? _buildEmptyChatState()
+                    : ListView.builder(
+                        controller: scrollController,
+                        itemCount: _messages.length,
+                        itemBuilder: (context, index) {
+                          final message = _messages[index];
+                          final isMe =
+                              message['sender']?['_id'] == userData['_id'];
 
-                return GestureDetector(
-                  onHorizontalDragUpdate: (details) =>
-                      _onHorizontalDragUpdate(details, message),
-                  onHorizontalDragEnd: _onHorizontalDragEnd,
-                  child: ChatBubble(
-                    message: message,
-                    isMe: isMe,
-                  ),
-                );
-              },
-            ),
+                          return GestureDetector(
+                            onHorizontalDragUpdate: (details) =>
+                                _onHorizontalDragUpdate(details, message),
+                            onHorizontalDragEnd: _onHorizontalDragEnd,
+                            child: ChatBubble(
+                              message: message,
+                              isMe: isMe,
+                            ),
+                          );
+                        },
+                      ),
           ),
           if (replyingTo != null)
             Container(
