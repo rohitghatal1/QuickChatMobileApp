@@ -48,11 +48,15 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   double _dragExtent = 0.0;
   bool _isReplyTriggered = false;
   bool _isSocketInitialized = false;
+  Timer? _chatRoomRefreshTimer;
 
   @override
   void initState() {
     super.initState();
     scrollToBottom();
+    _chatRoomRefreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      fetchMessages(widget.roomId);
+    });
     _initSocket(); // Initialize socket connection
 
     // Keep animation setup (unrelated to sockets)
@@ -109,8 +113,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     }
 
   }
-
-
+  
   void _onHorizontalDragUpdate(DragUpdateDetails details, dynamic message) {
     _dragExtent += details.primaryDelta ?? 0;
     if (_dragExtent > 60 && !_isReplyTriggered) {

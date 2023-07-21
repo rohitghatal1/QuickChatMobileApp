@@ -6,7 +6,7 @@ class SocketService {
   // Initialize socket connection
   void initSocket(String token) {
     socket = IO.io(
-      'http://192.168.18.17:5000', // Match your backend URL
+      'http://103.250.132.138:8880', // Match your backend URL
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
