@@ -3,11 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'config/constants.dart';
+
 import 'controllers/auth_controller.dart';
 import 'controllers/chat_controller.dart';
 import 'services/auth_service.dart';
-import 'services/chat_service.dart';
 import 'services/socket_service.dart';
 import 'services/api_service.dart';
 import 'views/splash_screen.dart';
@@ -46,15 +45,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: FutureBuilder<bool>(
-        future: authService.isLoggedIn(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          }
-          return const SplashScreen();
-        },
-      ),
+      home: const SplashScreen(),
     );
   }
 }
