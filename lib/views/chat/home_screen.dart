@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(user.username[0].toUpperCase()),
             ),
             title: Text(user.username),
-            subtitle: Text(user.email),
+            subtitle: Text(user.number),
             onTap: () {
               chatController.selectUser(user);
               Navigator.of(context).push(

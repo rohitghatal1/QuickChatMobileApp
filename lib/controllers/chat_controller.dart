@@ -98,7 +98,7 @@ class ChatController with ChangeNotifier {
 
     final message = Message(
       id: '', // Will be set by server
-      sender: User(id: senderId, username: '', email: ''),
+      sender: User(id: senderId, name: '', email: '', username: '', number: ''),
       receiver: _selectedUser!,
       content: content,
       timestamp: DateTime.now(),

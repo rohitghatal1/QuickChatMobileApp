@@ -16,12 +16,12 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _numberController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _numberController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -30,8 +30,16 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authController = Provider.of<AuthController>(context, listen: false);
+
+    final int? number = int.tryParse(_numberController.text.trim());
+    if(number == null){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid number'))
+      );
+      return;
+    }
     await authController.login(
-      email: _emailController.text.trim(),
+      number: number,
       password: _passwordController.text.trim(),
     );
 
@@ -54,14 +62,11 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CustomTextField(
-                controller: _emailController,
-                label: 'Email',
+                controller: _numberController,
+                label: 'Number',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Please enter a valid email';
+                    return 'Please enter your number';
                   }
                   return null;
                 },

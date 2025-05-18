@@ -19,7 +19,10 @@ class AuthController with ChangeNotifier {
   User? _currentUser;
   User? get currentUser => _currentUser;
 
+  /// Register User
   Future<void> register({
+    required String name,
+    required int number,
     required String username,
     required String email,
     required String password,
@@ -31,6 +34,8 @@ class AuthController with ChangeNotifier {
       final response = await apiService.post(
         '/auth/register',
         {
+          'name': name,
+          'number': number,
           'username': username,
           'email': email,
           'password': password,
@@ -40,7 +45,9 @@ class AuthController with ChangeNotifier {
       await authService.saveAuthData(response['token'], response['_id']);
       _currentUser = User(
         id: response['_id'],
+        name: response['name'],
         username: response['username'],
+        number: response['number'],
         email: response['email'],
       );
     } finally {
@@ -49,8 +56,9 @@ class AuthController with ChangeNotifier {
     }
   }
 
+  /// Login User
   Future<void> login({
-    required String email,
+    required int number,
     required String password,
   }) async {
     _isLoading = true;
@@ -60,16 +68,21 @@ class AuthController with ChangeNotifier {
       final response = await apiService.post(
         '/auth/login',
         {
-          'email': email,
+          'number': number,
           'password': password,
         },
       );
 
       await authService.saveAuthData(response['token'], response['_id']);
+
+      // Since login response doesn't send user details, you may need to fetch it
+      // If user data is returned from login, use this:
       _currentUser = User(
         id: response['_id'],
-        username: response['username'],
-        email: response['email'],
+        name: response['name'] ?? '',
+        username: response['username'] ?? '',
+        number: response['number'] ?? '',
+        email: response['email'] ?? '',
       );
     } finally {
       _isLoading = false;
@@ -77,19 +90,22 @@ class AuthController with ChangeNotifier {
     }
   }
 
+  /// Logout User
   Future<void> logout() async {
     await authService.clearAuthData();
     _currentUser = null;
     notifyListeners();
   }
 
+  /// Check Auth Status
   Future<void> checkAuthStatus() async {
     final token = authService.getToken();
     if (token != null) {
       // Here you would typically fetch user data
       final userId = authService.getUserId();
       if (userId != null) {
-        _currentUser = User(id: userId, username: 'User', email: 'user@example.com');
+        // You may want to fetch user details if needed
+        _currentUser = User(id: userId, name: 'User', email: 'rohitghatal@gmail.com', username: 'username', number: '9806415229');
       }
     }
   }
