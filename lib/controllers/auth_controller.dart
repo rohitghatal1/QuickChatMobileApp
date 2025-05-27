@@ -92,9 +92,16 @@ class AuthController with ChangeNotifier {
 
   /// Logout User
   Future<void> logout() async {
-    await authService.clearAuthData();
-    _currentUser = null;
+    _isLoading = true;
     notifyListeners();
+
+    try{
+      await authService.clearAuthData();
+      _currentUser = null;
+    } finally{
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   /// Check Auth Status

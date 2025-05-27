@@ -1,30 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_chat/views/auth/login_screen.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/chat_controller.dart';
 import '../../../models/user.dart';
 import 'chat_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ChatController>(context, listen: false).fetchUsers();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final authController = Provider.of<AuthController>(context);
     final chatController = Provider.of<ChatController>(context);
 
     return Scaffold(
@@ -32,15 +19,27 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Chats'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              authController.logout();
-            },
+            icon: const Icon(Icons.search),
+            onPressed: () {},
           ),
+          PopupMenuButton(itemBuilder: (context) => [
+            const PopupMenuItem(
+              child: Text('Logout'),
+              value: 'logout',
+            )
+          ],
+            onSelected: (value) async{
+            if(value == 'logout'){
+              await _handleLogout(context);
+            }
+            },
+          )
         ],
       ),
       body: chatController.isLoading
           ? const Center(child: CircularProgressIndicator())
+          : chatController.users.isEmpty
+          ? _buildEmptyState(context)
           : ListView.builder(
         itemCount: chatController.users.length,
         itemBuilder: (context, index) {
@@ -50,10 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(user.username[0].toUpperCase()),
             ),
             title: Text(user.username),
-            subtitle: Text(user.number),
+            subtitle: const Text('Tap to start chatting'),
             onTap: () {
               chatController.selectUser(user);
-              Navigator.of(context).push(
+              Navigator.push(
+                context,
                 MaterialPageRoute(
                   builder: (_) => ChatScreen(user: user),
                 ),
@@ -62,6 +62,57 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.chat),
+        onPressed: () => _showNewChatDialog(context),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.chat_bubble_outline, size: 100, color: Colors.grey),
+          const SizedBox(height: 20),
+          const Text('No chats yet', style: TextStyle(fontSize: 18)),
+          const SizedBox(height: 10),
+          TextButton(
+            onPressed: () => _showNewChatDialog(context),
+            child: const Text('START NEW CHAT'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final authController = Provider.of<AuthController>(context, listen: false);
+    final chatController = Provider.of<ChatController>(context, listen: false);
+
+    await authController.logout();
+    chatController.dispose();
+
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+            (route) => false);
+  }
+  void _showNewChatDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('New Chat'),
+          content: const Text('Feature coming soon!'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

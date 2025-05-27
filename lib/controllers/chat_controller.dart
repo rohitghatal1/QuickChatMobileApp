@@ -11,6 +11,7 @@ class ChatController with ChangeNotifier {
   final SocketService socketService;
   final AuthService authService;
 
+
   ChatController({
     required this.apiService,
     required this.socketService,
@@ -30,6 +31,7 @@ class ChatController with ChangeNotifier {
 
   User? _selectedUser;
   User? get selectedUser => _selectedUser;
+  String? get currentUserId => authService.getUserId();
 
   void _initializeSocket() {
     final token = authService.getToken();
@@ -69,8 +71,8 @@ class ChatController with ChangeNotifier {
     await fetchMessages(user.id);
 
     final userId = authService.getUserId();
-    if (userId != null) {
-      socketService.joinConversation(userId);
+    if (currentUserId != null) {
+      socketService.joinConversation(currentUserId!);
     }
   }
 
