@@ -61,6 +61,8 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Image.asset("assets/images/quickChatImage.png", height: 120),
+              SizedBox(height: 20),
               CustomTextField(
                 controller: _numberController,
                 label: 'Number',
