@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_chat/views/auth/login_screen.dart';
+import 'package:quick_chat/views/pages/my_profile.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/chat_controller.dart';
@@ -26,11 +27,19 @@ class HomeScreen extends StatelessWidget {
             const PopupMenuItem(
               child: Text('Logout'),
               value: 'logout',
+            ),
+            PopupMenuItem(
+                child: Text('My Profile'),
+                value: 'myProfile',
             )
           ],
             onSelected: (value) async{
             if(value == 'logout'){
               await _handleLogout(context);
+            } else if (value == 'myProfile'){
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => ProfileScreen()),
+              );
             }
             },
           )
@@ -98,6 +107,7 @@ class HomeScreen extends StatelessWidget {
         MaterialPageRoute(builder: (_) => const LoginScreen()),
             (route) => false);
   }
+
   void _showNewChatDialog(BuildContext context) {
     showDialog(
       context: context,
