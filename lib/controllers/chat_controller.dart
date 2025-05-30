@@ -47,21 +47,37 @@ class ChatController with ChangeNotifier {
     }
   }
 
-  Future<void> fetchUsers() async {
+  Future<List<User>> fetchAllUsers () async {
     _isLoading = true;
     notifyListeners();
 
-    try {
+    try{
       final token = authService.getToken();
-      if (token != null) {
-        final response = await apiService.get('/chat/users', token: token);
-        _users = (response as List).map((user) => User.fromJson(user)).toList();
+      if(token != null){
+        final response = await apiService.get('/users/getUsers', token: token);
+        return (response as List).map((user) => User.fromJson(user)).toList();
       }
+      return[];
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
+  // Future<void> fetchUsers() async {
+  //   _isLoading = true;
+  //   notifyListeners();
+  //
+  //   try {
+  //     final token = authService.getToken();
+  //     if (token != null) {
+  //       final response = await apiService.get('/users/getUsers', token: token);
+  //       _users = (response as List).map((user) => User.fromJson(user)).toList();
+  //     }
+  //   } finally {
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   }
+  // }
 
   Future<void> selectUser(User user) async {
     _selectedUser = user;

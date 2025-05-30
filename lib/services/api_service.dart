@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:quick_chat/models/user.dart';
 
 import '../config/constants.dart';
 
@@ -10,11 +11,15 @@ class ApiService {
     'Content-Type': 'application/json',
   };
 
+  Future<List<User>> getUsers() async {
+    final response = await get('/users/getUsers');
+    return (response as List).map((user) => User.fromJson(user)).toList();
+  }
+
   Future<dynamic> get(String endpoint, {String? token}) async {
     if (token != null) {
       headers['Authorization'] = 'Bearer $token';
     }
-
     final response = await http.get(
       Uri.parse('$baseUrl$endpoint'),
       headers: headers,

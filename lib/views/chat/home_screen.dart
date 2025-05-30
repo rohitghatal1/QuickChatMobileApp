@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_chat/views/auth/login_screen.dart';
 import 'package:quick_chat/views/pages/my_profile.dart';
+import 'package:quick_chat/views/pages/new_chat_screen.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/chat_controller.dart';
@@ -88,7 +89,12 @@ class HomeScreen extends StatelessWidget {
           const Text('No chats yet', style: TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
           TextButton(
-            onPressed: () => _showNewChatDialog(context),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => NewChatScreen()),
+              );
+            },
             child: const Text('START NEW CHAT'),
           ),
         ],
