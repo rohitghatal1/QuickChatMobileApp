@@ -87,10 +87,17 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   title: Text(user.username),
                   subtitle: Text(user.email),
                   onTap: () {
+                    if(user.id.isEmpty){
+                      print('Invalid user data: $user');
+                      return;
+                    }
+                    final chatController = context.read<ChatController>();
                     chatController.selectUser(user);
+                    print("navigating with user: ${user.id}");
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
+
                         builder: (_) => ChatScreen(user: user),
                       ),
                     );

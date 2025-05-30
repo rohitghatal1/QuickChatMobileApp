@@ -55,6 +55,7 @@ class ChatController with ChangeNotifier {
       final token = authService.getToken();
       if(token != null){
         final response = await apiService.get('/users/getUsers', token: token);
+        print('API Response for user: $response');
         return (response as List).map((user) => User.fromJson(user)).toList();
       }
       return[];
@@ -80,6 +81,9 @@ class ChatController with ChangeNotifier {
   // }
 
   Future<void> selectUser(User user) async {
+    if(user.id.isEmpty){
+      throw ArgumentError('Invalid user: User Id is empty');
+    }
     _selectedUser = user;
     _messages = [];
     notifyListeners();
