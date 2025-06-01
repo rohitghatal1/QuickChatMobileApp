@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../models/message.dart';
 import '../models/user.dart';
 import '../services/api_service.dart';
 import '../services/socket_service.dart';
 import '../services/auth_service.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class ChatController with ChangeNotifier {
   final ApiService apiService;
   final SocketService socketService;
   final AuthService authService;
 
+  List<Message> _message = [];
+  User? _selectedUser;
+  io.Socket? _socket;
+
+  List<Message> get message => _message;
+  User? get selectedUser => _selectedUser;
+  String? get currentUserId => authService.getUserId();
 
   ChatController({
     required this.apiService,
@@ -28,10 +37,6 @@ class ChatController with ChangeNotifier {
 
   List<Message> _messages = [];
   List<Message> get messages => _messages;
-
-  User? _selectedUser;
-  User? get selectedUser => _selectedUser;
-  String? get currentUserId => authService.getUserId();
 
   void _initializeSocket() {
     final token = authService.getToken();
@@ -104,8 +109,19 @@ class ChatController with ChangeNotifier {
       final token = authService.getToken();
       if (token != null) {
         final response = await apiService.get('/chat/messages/$userId', token: token);
-        _messages = (response as List).map((msg) => Message.fromJson(msg)).toList();
+
+        if(response is List){
+          _messages = (response as List).map((msg) => Message.fromJson(msg)).toList();
+        } else{
+          print('Unexpected response for message: $response');
+          Fluttertoast.showToast(msg: 'Failed to fetch message: unexpected data fromat');
+          _message = [];
+        }
       }
+    } catch(e, stack){
+      print('Error in fetchMessage: $e\n$stack');
+      Fluttertoast.showToast(msg: 'Error fetching message');
+      _message = [];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -113,7 +129,7 @@ class ChatController with ChangeNotifier {
   }
 
   Future<void> sendMessage(String content) async {
-    if (_selectedUser == null) return;
+    if (_selectedUser == null || currentUserId == null) return;
 
     final senderId = authService.getUserId();
     if (senderId == null) return;

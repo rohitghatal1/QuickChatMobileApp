@@ -43,6 +43,7 @@ class ApiService {
   }
 
   dynamic _handleResponse(http.Response response) {
+    print('Raw response body: ${response.body}');
     final responseBody = jsonDecode(response.body);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {

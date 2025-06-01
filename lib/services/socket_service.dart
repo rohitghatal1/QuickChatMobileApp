@@ -48,11 +48,7 @@ class SocketService {
     required String receiverId,
     required String content,
   }) {
-    socket.emit('sendMessage', {
-      'senderId': senderId,
-      'receiverId': receiverId,
-      'content': content,
-    });
+    socket.emit('sendMessage', [senderId, receiverId, content]);
   }
 
   void disconnect() {
