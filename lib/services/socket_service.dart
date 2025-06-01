@@ -44,11 +44,11 @@ class SocketService {
   }
 
   void sendMessage({
-    required String senderId,
+    required String token,
     required String receiverId,
     required String content,
   }) {
-    socket.emit('sendMessage', [senderId, receiverId, content]);
+    socket.emit('sendMessage', {token, receiverId, content});
   }
 
   void disconnect() {

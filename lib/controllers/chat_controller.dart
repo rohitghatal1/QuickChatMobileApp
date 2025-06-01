@@ -146,8 +146,10 @@ class ChatController with ChangeNotifier {
     _messages.add(message);
     notifyListeners();
 
+    final token = authService.getToken();
+
     socketService.sendMessage(
-      senderId: senderId,
+      token: token!,
       receiverId: _selectedUser!.id,
       content: content,
     );
