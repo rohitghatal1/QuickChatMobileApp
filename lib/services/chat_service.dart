@@ -3,7 +3,6 @@ import '../models/user.dart';
 
 class ChatService {
   Future<List<User>> getUsers(String token) async {
-    // This will be implemented in the ChatController
     throw UnimplementedError();
   }
 

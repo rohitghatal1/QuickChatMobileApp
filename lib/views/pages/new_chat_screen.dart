@@ -75,36 +75,36 @@ class _NewChatScreenState extends State<NewChatScreen> {
             child: chatController.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredUsers.isEmpty
-                ? const Center(child: Text('No users found'))
-                : ListView.builder(
-              itemCount: _filteredUsers.length,
-              itemBuilder: (context, index) {
-                final user = _filteredUsers[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    child: Text(user.username[0].toUpperCase()),
-                  ),
-                  title: Text(user.username),
-                  subtitle: Text(user.email),
-                  onTap: () {
-                    if(user.id.isEmpty){
-                      print('Invalid user data: $user');
-                      return;
-                    }
-                    final chatController = context.read<ChatController>();
-                    chatController.selectUser(user);
-                    print("navigating with user: ${user.id}");
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-
-                        builder: (_) => ChatScreen(user: user),
+                    ? const Center(child: Text('No users found'))
+                    : ListView.builder(
+                        itemCount: _filteredUsers.length,
+                        itemBuilder: (context, index) {
+                          final user = _filteredUsers[index];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              child: Text(user.username[0].toUpperCase()),
+                            ),
+                            title: Text(user.username),
+                            subtitle: Text(user.email),
+                            onTap: () {
+                              if (user.id.isEmpty) {
+                                print('Invalid user data: $user');
+                                return;
+                              }
+                              final chatController =
+                                  context.read<ChatController>();
+                              chatController.selectUser(user);
+                              print("navigating with user: ${user.id}");
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChatScreen(user: user),
+                                ),
+                              );
+                            },
+                          );
+                        },
                       ),
-                    );
-                  },
-                );
-              },
-            ),
           ),
         ],
       ),

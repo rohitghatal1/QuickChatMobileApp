@@ -6,7 +6,6 @@ import 'package:quick_chat/views/pages/new_chat_screen.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/chat_controller.dart';
-import '../../../models/user.dart';
 import 'chat_screen.dart';
 
 class HomeScreen extends StatelessWidget {

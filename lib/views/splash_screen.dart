@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       );
     } catch (e) {
-      print('Error in _checkAuthStatus: $e'); // Debug error
+      print('Error in _checkAuthStatus: $e');
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
