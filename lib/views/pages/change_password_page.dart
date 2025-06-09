@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-class UpdateProfilePage extends StatelessWidget {
-  const UpdateProfilePage({super.key});
+
+class ChangePasswordPage extends StatelessWidget {
+  const ChangePasswordPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: Text('Update Profile'),
+        title: Text('Change Password'),
         centerTitle: true,
       ),
     );
