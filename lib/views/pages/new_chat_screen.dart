@@ -71,6 +71,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
               ),
             ),
           ),
+
           Expanded(
             child: chatController.isLoading
                 ? const Center(child: CircularProgressIndicator())
