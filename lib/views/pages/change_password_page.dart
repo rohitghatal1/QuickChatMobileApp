@@ -10,6 +10,10 @@ class ChangePasswordPage extends StatelessWidget {
         title: Text('Change Password'),
         centerTitle: true,
       ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
+        child: Text("Change password view"),
+      ),
     );
   }
 }
