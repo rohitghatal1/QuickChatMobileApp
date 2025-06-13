@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quick_chat/widgets/custom_textfield.dart';
 
 class ChangePasswordPage extends StatelessWidget {
   const ChangePasswordPage({super.key});
