@@ -66,30 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final authController = Provider.of<AuthController>(context, listen: false);
-
-    final int? number = int.tryParse(_numberController.text.trim());
-    if(number == null){
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid number'))
-      );
-      return;
-    }
-    await authController.login(
-      number: number,
-      password: _passwordController.text.trim(),
-    );
-
-    if (authController.currentUser != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,14 +105,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              Consumer<AuthController>(
-                builder: (context, authController, _) {
-                  return CustomButton(
-                    onPressed: _login,
-                    text: 'Login',
-                    isLoading: authController.isLoading,
-                  );
-                },
+              CustomButton(
+                  onPressed: _login,
+                  text: 'login'
               ),
               const SizedBox(height: 16),
               TextButton(

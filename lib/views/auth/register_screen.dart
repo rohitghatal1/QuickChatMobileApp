@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_chat/utils/Dio/myDio.dart';
 
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
@@ -22,6 +23,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  Future<void> _register() async {
+   if(!_formKey.currentState!.validate()) return;
+
+   final int? number = int.tryParse(_numberController.text.trim());
+   if(number == null){
+     ScaffoldMessenger.of(context).showSnackBar(
+       const SnackBar(content: Text('Please enter a valid number')),
+     );
+     return;
+   }
+
+   try{
+    final response = await (await (MyDio().getDio())).post("/auth/register", data: {
+      "name": _nameController.text.trim(),
+      "number": number,
+      "username": _usernameController.text.trim(),
+      "email": _emailController.text.trim(),
+      "password": _passwordController.text.trim(),
+    });
+
+    final token = response.data["token"];
+
+    if(token != null){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Registration successful')),
+      );
+      Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const LoginScreen())
+        ,);
+    }
+   } catch (e){
+     print("Register error : $e");
+     ScaffoldMessenger.of(context).showSnackBar(
+       const SnackBar(content: Text("Registration failed")),
+     );
+   }
+
+  }
   @override
   void dispose() {
     _nameController.dispose();
@@ -32,32 +71,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  Future<void> _register() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final int? number = int.tryParse(_numberController.text.trim());
-    if (number == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid number')),
-      );
-      return;
-    }
-
-    final authController = Provider.of<AuthController>(context, listen: false);
-    await authController.register(
-      name: _nameController.text.trim(),
-      number: number,
-      username: _usernameController.text.trim(),
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-    );
-
-    if (authController.currentUser != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,15 +159,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           return null;
                         },
                       ),
-                      Consumer<AuthController>(
-                        builder: (context, authController, _) {
-                          return CustomButton(
-                            onPressed: authController.isLoading ? null : _register,
-                            text: 'Register',
-                            isLoading: authController.isLoading,
-                          );
-                        },
-                      ),
+                   CustomButton(
+                       onPressed: _register,
+                       text: 'Register'
+                   ),
 
                       TextButton(
                         onPressed: () {
