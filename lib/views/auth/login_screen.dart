@@ -39,11 +39,9 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       final token = response.data["token"];
-
       if(token != null){
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("quickChatAccessToken", token);
-
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => HomeScreen()),
         );
