@@ -22,6 +22,9 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
+  Future<void> sendMessage async (){
+
+}
   @override
   Widget build(BuildContext context) {
     final chatController = Provider.of<ChatController>(context);

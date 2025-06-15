@@ -1,5 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_chat/utils/Dio/myDio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
@@ -19,6 +22,43 @@ class _LoginScreenState extends State<LoginScreen> {
   final _numberController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  Future<void> _login() async{
+    if(!_formKey.currentState!.validate()) return;
+
+    final int? number = int.tryParse(_numberController.text.trim());
+    if(number == null){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid number")),
+      );
+      return;
+    }
+    try{
+      final response = await (await (MyDio().getDio())).post("/auth/login", data:{
+        "number": number,
+        "password": _passwordController.text.trim(),
+      });
+
+      final token = response.data["token"];
+
+      if(token != null){
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("quickChatAccessToken", token);
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => HomeScreen()),
+        );
+      } else{
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Login failed: token missing")),
+        );
+      }
+    } catch(e){
+      print("Login error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login failed")),
+      );
+    }
+  }
   @override
   void dispose() {
     _numberController.dispose();
@@ -92,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Consumer<AuthController>(
                 builder: (context, authController, _) {
                   return CustomButton(
-                    onPressed: authController.isLoading ? null : _login,
+                    onPressed: _login,
                     text: 'Login',
                     isLoading: authController.isLoading,
                   );
