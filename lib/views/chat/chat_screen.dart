@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_chat/utils/Dio/myDio.dart';
 
 import '../../../controllers/chat_controller.dart';
 import '../../../models/user.dart';
@@ -16,6 +17,16 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
 
+
+  Future<void> _sendMessage() async{
+    try{
+      final response = await (await(MyDio().getDio())).post("/chat/sendMessage", data: {
+        "message" : _messageController.text.trim();
+      });
+  } catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot send message')));
+  }
+}
   @override
   void dispose() {
     _messageController.dispose();
