@@ -21,7 +21,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _sendMessage() async{
     try{
       final response = await (await(MyDio().getDio())).post("/chat/sendMessage", data: {
-        "message" : _messageController.text.trim();
+        "message" : _messageController.text.trim()
       });
   } catch(e){
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot send message')));
@@ -49,6 +49,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
+
       body: Column(
         children: [
           Expanded(
@@ -102,21 +103,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 hintText: 'Type a message...',
                 border: OutlineInputBorder(),
               ),
-              onSubmitted: (_) => _sendMessage(chatController),
+              onSubmitted: (_) => _sendMessage(),
             ),
           ),
           IconButton(
             icon: const Icon(Icons.send),
-            onPressed: () => _sendMessage(chatController),
+            onPressed: () => _sendMessage(),
           ),
         ],
       ),
     );
   }
 
-  void _sendMessage(ChatController chatController) {
-    if (_messageController.text.trim().isEmpty) return;
-    chatController.sendMessage(_messageController.text.trim());
-    _messageController.clear();
-  }
 }
