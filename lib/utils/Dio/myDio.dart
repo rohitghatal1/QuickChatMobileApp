@@ -6,7 +6,7 @@ class MyDio {
   Future<Dio> getDio() async {
     String apiUrl = "http://192.168.18.31:5000/api";
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? accessToken = await prefs.getString("accessToken");
+    String? accessToken = await prefs.getString("quickChatAccessToken");
 
     BaseOptions baseOptions = BaseOptions(
         baseUrl: "${apiUrl}",

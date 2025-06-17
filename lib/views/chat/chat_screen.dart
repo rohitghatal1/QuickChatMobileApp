@@ -30,6 +30,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       _messageController.clear();
   } catch(e){
+      print("message sending error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cannot send message')),
       );

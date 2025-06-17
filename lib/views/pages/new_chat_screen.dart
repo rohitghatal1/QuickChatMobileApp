@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/chat_controller.dart';
 import '../../models/user.dart';
+import '../../utils/Dio/myDio.dart';
 import '../chat/chat_screen.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -14,38 +17,48 @@ class NewChatScreen extends StatefulWidget {
 class _NewChatScreenState extends State<NewChatScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<User> _filteredUsers = [];
+  List<User> _allUsers = [];
 
   @override
   void initState() {
     super.initState();
-    _loadUsers();
+    getUsers();
     _searchController.addListener(_filterUsers);
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  Future<void> getUsers() async{
+    try{
+      final response = await (await (MyDio().getDio())).get("/users/getUsers");
+      if (response.data != null) {
+        final List<User> users = (response.data as List).map((json) => User.fromJson(json)).toList();
+
+        setState(() {
+          _allUsers = users;
+          _filteredUsers = users;
+        });
+      } else {
+        throw Exception("Failed to fetch users");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error fetching users")));
+    }
   }
 
-  Future<void> _loadUsers() async {
-    final chatController = Provider.of<ChatController>(context, listen: false);
-    final users = await chatController.fetchAllUsers();
-    setState(() {
-      _filteredUsers = users;
-    });
-  }
 
   void _filterUsers() {
     final query = _searchController.text.toLowerCase();
-    final chatController = Provider.of<ChatController>(context, listen: false);
 
     setState(() {
-      _filteredUsers = chatController.users.where((user) {
-        return user.username.toLowerCase().contains(query) ||
-            user.email.toLowerCase().contains(query);
+      _filteredUsers = _allUsers.where((user) {
+        return user.username.toLowerCase().contains(query);
       }).toList();
     });
+  }
+
+  @override
+  void dispose(){
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
