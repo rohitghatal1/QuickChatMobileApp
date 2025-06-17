@@ -19,12 +19,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
 
   Future<void> _sendMessage() async{
+    final content = _messageController.text.trim();
+    if(content.isEmpty) return;
+
     try{
       final response = await (await(MyDio().getDio())).post("/chat/sendMessage", data: {
-        "message" : _messageController.text.trim()
+        "receiverId" : widget.user.id,
+        "content": content,
       });
+
+      _messageController.clear();
   } catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot send message')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cannot send message')),
+      );
   }
 }
   @override
