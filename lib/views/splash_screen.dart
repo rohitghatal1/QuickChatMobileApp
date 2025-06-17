@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../controllers/auth_controller.dart';
+import '../utils/Dio/myDio.dart';
 import 'auth/login_screen.dart';
 import 'chat/home_screen.dart';
 
@@ -21,10 +23,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkAuthStatus() async {
     try {
-      final authController = Provider.of<AuthController>(context, listen: false);
-      await authController.checkAuthStatus();
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("quickChatAccessToken");
 
-      print('Debug: Current User = ${authController.currentUser}'); // Debug log
+      if (token != null && token.isNotEmpty) {
+        print('Debug: Token found and set in Dio');
+      } else {
+        print('Debug: No token found in prefs');
+      }
+
+      final authController = Provider.of<AuthController>(context, listen: false);
+      await authController.checkAuthStatus(); // Assumes this fetches current user using MyDio
 
       if (!mounted) return;
 
