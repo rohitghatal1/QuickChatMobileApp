@@ -1,11 +1,13 @@
-import 'package:beenproject/main.dart';
 import 'package:flutter/material.dart';
+
+import '../main.dart';
 
 void MyDialog(
     {BuildContext? context,
       required String title,
       required String message,
       required String okText}) {
+
   showDialog(
       context: navigationKey.currentContext!,
       builder: (context) {

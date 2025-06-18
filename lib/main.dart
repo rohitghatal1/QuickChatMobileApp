@@ -31,6 +31,8 @@ void main() async {
   );
 }
 
+final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatelessWidget {
   final AuthService authService;
 
