@@ -1,19 +1,72 @@
+import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quick_chat/views/auth/login_screen.dart';
-import 'package:quick_chat/views/pages/my_profile.dart';
-import 'package:quick_chat/views/pages/new_chat_screen.dart';
+import 'package:quick_chat/models/message.dart';
 
-import '../../../controllers/auth_controller.dart';
-import '../../../controllers/chat_controller.dart';
+import '../../controllers/auth_controller.dart';
+import '../../controllers/chat_controller.dart';
+import '../../utils/Dio/myDio.dart';
+import '../auth/login_screen.dart';
+import '../pages/my_profile.dart';
+import '../pages/new_chat_screen.dart';
 import 'chat_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<Message> _allMessages = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getMyChats();
+  }
+
+  Future<void> _getMyChats() async {
+    try {
+      final dio = await MyDio().getDio();
+      final response = await dio.get("/chat/message/getMyMessages");
+
+      if(response.data != null){
+        final List<Message> messages = (response.data as List).map((json) => Message.fromJson(json)).toList();
+
+        setState(() {
+          _allMessages = messages;
+          _isLoading = false;
+        });
+      }
+      // Handle or parse response if needed
+      print("Fetched chats: ${response.data}");
+    } catch (err) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No chats found")),
+      );
+    }
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final authController = Provider.of<AuthController>(context, listen: false);
+    await authController.logout();
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final chatController = Provider.of<ChatController>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -23,48 +76,48 @@ class HomeScreen extends StatelessWidget {
             icon: const Icon(Icons.search),
             onPressed: () {},
           ),
-          PopupMenuButton(itemBuilder: (context) => [
-            const PopupMenuItem(
-              child: Text('Logout'),
-              value: 'logout',
-            ),
-            PopupMenuItem(
+          PopupMenuButton(
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                child: Text('Logout'),
+                value: 'logout',
+              ),
+              const PopupMenuItem(
                 child: Text('My Profile'),
                 value: 'myProfile',
-            )
-          ],
-            onSelected: (value) async{
-            if(value == 'logout'){
-              await _handleLogout(context);
-            } else if (value == 'myProfile'){
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => ProfileScreen()),
-              );
-            }
+              ),
+            ],
+            onSelected: (value) async {
+              if (value == 'logout') {
+                await _handleLogout(context);
+              } else if (value == 'myProfile') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => ProfileScreen()),
+                );
+              }
             },
-          )
+          ),
         ],
       ),
-      body: chatController.isLoading
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : chatController.users.isEmpty
+          : _allMessages.isEmpty
           ? _buildEmptyState(context)
           : ListView.builder(
-        itemCount: chatController.users.length,
+        itemCount: _allMessages.length,
         itemBuilder: (context, index) {
-          final user = chatController.users[index];
+          final message = _allMessages[index];
           return ListTile(
             leading: CircleAvatar(
-              child: Text(user.username[0].toUpperCase()),
+              child: Text(message.sender.username[0].toUpperCase()),
             ),
-            title: Text(user.username),
-            subtitle: const Text('Tap to start chatting'),
+            title: Text(message.content ?? "No message"),
+            subtitle: Text('From : ${message.sender?.username ?? "Unknown"}'),
             onTap: () {
-              chatController.selectUser(user);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ChatScreen(user: user),
+                  builder: (_) => ChatScreen(user: message.receiver),
                 ),
               );
             },
@@ -73,7 +126,12 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.chat),
-        onPressed: () => _showNewChatDialog(context),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => NewChatScreen()),
+          );
+        },
       ),
     );
   }
@@ -90,44 +148,14 @@ class HomeScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => NewChatScreen()),
+                context,
+                MaterialPageRoute(builder: (_) => NewChatScreen()),
               );
             },
             child: const Text('START NEW CHAT'),
           ),
         ],
       ),
-    );
-  }
-
-  Future<void> _handleLogout(BuildContext context) async {
-    final authController = Provider.of<AuthController>(context, listen: false);
-    final chatController = Provider.of<ChatController>(context, listen: false);
-
-    await authController.logout();
-    chatController.dispose();
-
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-            (route) => false);
-  }
-
-  void _showNewChatDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('New Chat'),
-          content: const Text('Feature coming soon!'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
