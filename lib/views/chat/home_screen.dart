@@ -109,7 +109,11 @@ class _HomeScreenState extends State<HomeScreen> {
           final message = _allMessages[index];
           return ListTile(
             leading: CircleAvatar(
-              child: Text(message.sender.username[0].toUpperCase()),
+                child: Text(
+                  message.sender.username.isNotEmpty
+                      ? message.sender.username[0].toUpperCase()
+                      : '?',
+                ),
             ),
             title: Text(message.content ?? "No message"),
             subtitle: Text('From : ${message.sender?.username ?? "Unknown"}'),

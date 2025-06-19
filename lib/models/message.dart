@@ -20,14 +20,21 @@ class Message {
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
-    return Message(
-      id: json['_id'],
-      sender: User.fromJson(json['sender']),
-      receiver: User.fromJson(json['receiver']),
-      content: json['content'],
-      timestamp: DateTime.parse(json['timestamp'] ?? json['timeStamp']),
-      read: json['read'],
-    );
+    try {
+      print("📥 Incoming message JSON: $json");
+
+      return Message(
+        id: json['_id'],
+        sender: User.fromJson(json['sender']),
+        receiver: User.fromJson(json['receiver']),
+        content: json['content'] ?? '',
+        timestamp: DateTime.parse(json['timestamp'] ?? json['timeStamp']),
+        read: json['read'] ?? false,
+      );
+    } catch (e, stacktrace) {
+      print("❌ Error parsing message: $e\nStack: $stacktrace\nRaw JSON: $json");
+      rethrow;
+    }
   }
 
   String get formattedTime {
