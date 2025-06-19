@@ -8,6 +8,7 @@ class MyDio {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? accessToken = await prefs.getString("quickChatAccessToken");
 
+    print("sending access token $accessToken");
     BaseOptions baseOptions = BaseOptions(
         baseUrl: "${apiUrl}",
         connectTimeout: Duration(seconds: 20),

@@ -32,14 +32,11 @@ class _SplashScreenState extends State<SplashScreen> {
         print('Debug: No token found in prefs');
       }
 
-      final authController = Provider.of<AuthController>(context, listen: false);
-      await authController.checkAuthStatus(); // Assumes this fetches current user using MyDio
-
       if (!mounted) return;
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => authController.currentUser != null
+          builder: (_) => token != null
               ? const HomeScreen()
               : const LoginScreen(),
         ),

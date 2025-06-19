@@ -25,7 +25,7 @@ class Message {
       sender: User.fromJson(json['sender']),
       receiver: User.fromJson(json['receiver']),
       content: json['content'],
-      timestamp: DateTime.parse(json['timestamp']),
+      timestamp: DateTime.parse(json['timestamp'] ?? json['timeStamp']),
       read: json['read'],
     );
   }
