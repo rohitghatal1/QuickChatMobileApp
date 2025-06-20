@@ -1,43 +1,31 @@
-import 'package:intl/intl.dart';
-
-import 'user.dart';
-
 class Message {
   final String id;
-  final User sender;
-  final User receiver;
+  final String chatRoom;
+  final String sender;
   final String content;
-  final DateTime timestamp;
-  final bool read;
+  final List<String> readBy;
+  final DateTime createAt;
+  final DateTime updatedAt;
 
   Message({
     required this.id,
+    required this.chatRoom,
     required this.sender,
-    required this.receiver,
     required this.content,
-    required this.timestamp,
-    required this.read,
-  });
+    required this.readBy,
+    required this.createAt,
+    required this.updatedAt,
+});
 
-  factory Message.fromJson(Map<String, dynamic> json) {
-    try {
-      print("📥 Incoming message JSON: $json");
-
-      return Message(
-        id: json['_id'],
-        sender: User.fromJson(json['sender']),
-        receiver: User.fromJson(json['receiver']),
-        content: json['content'] ?? '',
-        timestamp: DateTime.parse(json['timestamp'] ?? json['timeStamp']),
-        read: json['read'] ?? false,
-      );
-    } catch (e, stacktrace) {
-      print("❌ Error parsing message: $e\nStack: $stacktrace\nRaw JSON: $json");
-      rethrow;
-    }
-  }
-
-  String get formattedTime {
-    return DateFormat('HH:mm').format(timestamp);
+  factory Message.fromJson(Map<String, dynamic> json){
+    return Message(
+      id: json['_id'],
+      chatRoom: json['chatRoom'],
+      sender: json['sender'],
+      content: json['content'] ?? '',
+      readBy: List<String>.from(json['readBy']),
+      createAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+    );
   }
 }

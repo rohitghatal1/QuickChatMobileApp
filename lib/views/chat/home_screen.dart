@@ -115,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       : '?',
                 ),
             ),
-            title: Text(message.content ?? "No message"),
+            title: Text(message.receiver.username),
             subtitle: Text('From : ${message.sender?.username ?? "Unknown"}'),
             onTap: () {
               Navigator.push(
