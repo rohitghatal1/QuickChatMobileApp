@@ -1,8 +1,5 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../controllers/chat_controller.dart';
 import '../../models/user.dart';
 import '../../utils/Dio/myDio.dart';
 import '../chat/chat_screen.dart';
@@ -37,6 +34,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
         setState(() {
           _allUsers = users;
           _filteredUsers = users;
+          _isLoading = false;
         });
       } else {
         throw Exception("Failed to fetch users");

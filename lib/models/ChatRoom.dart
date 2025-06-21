@@ -19,7 +19,6 @@ class ChatRoom {
   });
 
   factory ChatRoom.fromJson(Map<String, dynamic> json) {
-    // Handle participants - they should be User objects
     List<User> participants = [];
     if (json['participants'] is List) {
       participants = (json['participants'] as List).map((participant) {
@@ -42,7 +41,7 @@ class ChatRoom {
     return ChatRoom(
       id: json['_id'],
       participants: participants,
-      lastMessage: json['lastMessage'] != null
+      lastMessage: (json['lastMessage'] is Map<String, dynamic>)
           ? Message.fromJson(json['lastMessage'])
           : null,
       isGroup: json['isGroup'] ?? false,

@@ -75,6 +75,8 @@ class _ChatScreenState extends State<ChatScreen> {
         "roomId": widget.roomId,
         "content": content,
       });
+      print('response received: ${response.data}');
+      print('Type of data: ${response.data.runtimeType}');
 
       _messageController.clear();
 

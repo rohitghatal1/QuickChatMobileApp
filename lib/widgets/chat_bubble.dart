@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../models/message.dart';
 
@@ -14,6 +15,7 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formattedTime = DateFormat('hh:mm a').format(message.createAt);
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -35,7 +37,7 @@ class ChatBubble extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              message.createAt as String,
+              formattedTime,
               style: TextStyle(
                 color: isMe ? Colors.white70 : Colors.black54,
                 fontSize: 10,
