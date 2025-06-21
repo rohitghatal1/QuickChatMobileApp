@@ -50,17 +50,34 @@ class _ChatScreenState extends State<ChatScreen> {
       final dio = await MyDio().getDio();
       final response = await dio.get("/chat/room/$roomId/messages");
 
-      final List<Message> messages = (response.data as List)
-          .map((json) => Message.fromJson(json))
-          .toList();
+      // Debug: Print raw response string
+      print("Raw response string: ${response.data}");
 
+      // Parse the response
+      final List<dynamic> messageList = response.data;
+      print("Parsed as List: $messageList");
+
+      // Convert each message
+      final List<Message> messages = messageList.map((messageJson) {
+        try {
+          print("Processing message: $messageJson");
+          return Message.fromJson(messageJson);
+        } catch (e, stack) {
+          print("Error parsing message $messageJson: $e\n$stack");
+          throw e; // Re-throw to catch in outer block
+        }
+      }).toList();
+
+      print("Successfully parsed ${messages.length} messages");
       setState(() {
         _messages = messages.reversed.toList();
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (e, stack) {
+      print("Error in fetchMessages: $e\n$stack");
+      setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to fetch messages')),
+        SnackBar(content: Text('Failed to fetch messages: ${e.toString()}')),
       );
     }
   }

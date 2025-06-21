@@ -49,10 +49,10 @@ class Message {
     }
 
     return Message(
-      id: json['_id'],
+      id: json['_id']?.toString() ?? '',
       chatRoom: chatRoom,
       sender: sender,
-      content: json['content'] ?? '[No content]', // <-- Prevents crash
+      content: json['content'] ?? '[No content]',
       readBy: List<String>.from(json['readBy'] ?? []),
       createAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),

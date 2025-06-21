@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchMyChatRooms() async {
     try {
       final dio = await MyDio().getDio();
-      final response = await dio.get("chat/room/getMyChatRooms");
+      final response = await dio.get("/chat/room/getMyChatRooms");
 
       if (response.data != null) {
         final List<ChatRoom> rooms = (response.data as List)
@@ -60,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isLoading = false;
       });
+      print("error fetching rooms $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to fetch chat rooms")),
       );
