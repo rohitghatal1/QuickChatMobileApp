@@ -10,10 +10,8 @@ class ProfileScreen extends StatelessWidget{
 
   Future<void> _handleLogout(BuildContext context) async {
     final authController = Provider.of<AuthController>(context, listen: false);
-    final chatController = Provider.of<ChatController>(context, listen: false);
 
     await authController.logout();
-    chatController.dispose();
 
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),

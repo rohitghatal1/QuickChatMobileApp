@@ -18,6 +18,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<User> _filteredUsers = [];
   List<User> _allUsers = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -26,11 +27,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
     _searchController.addListener(_filterUsers);
   }
 
-  Future<void> getUsers() async{
-    try{
+  Future<void> getUsers() async {
+    try {
       final response = await (await (MyDio().getDio())).get("/users/getUsers");
       if (response.data != null) {
-        final List<User> users = (response.data as List).map((json) => User.fromJson(json)).toList();
+        final List<User> users =
+        (response.data as List).map((json) => User.fromJson(json)).toList();
 
         setState(() {
           _allUsers = users;
@@ -40,10 +42,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
         throw Exception("Failed to fetch users");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error fetching users")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Error fetching users")));
     }
   }
-
 
   void _filterUsers() {
     final query = _searchController.text.toLowerCase();
@@ -52,18 +54,36 @@ class _NewChatScreenState extends State<NewChatScreen> {
       _filteredUsers = _allUsers.where((user) {
         return user.username.toLowerCase().contains(query);
       }).toList();
+      _isLoading = false;
     });
   }
 
+  Future<String?> getOrCreateRoom(String receiverId) async {
+    try {
+      final dio = await MyDio().getDio();
+      final response = await dio.post("/chat/getOrCreateRoom", data: {
+        "receiverId": receiverId,
+      });
+
+      final roomId = response.data['_id'];
+      return roomId;
+    } catch (e) {
+      print("Error getting room : $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot openn chat')),
+      );
+      return null;
+    }
+  }
+
   @override
-  void dispose(){
+  void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final chatController = Provider.of<ChatController>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -84,41 +104,35 @@ class _NewChatScreenState extends State<NewChatScreen> {
               ),
             ),
           ),
-
           Expanded(
-            child: chatController.isLoading
+            child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredUsers.isEmpty
-                    ? const Center(child: Text('No users found'))
-                    : ListView.builder(
-                        itemCount: _filteredUsers.length,
-                        itemBuilder: (context, index) {
-                          final user = _filteredUsers[index];
-                          return ListTile(
-                            leading: CircleAvatar(
-                              child: Text(user.username[0].toUpperCase()),
-                            ),
-                            title: Text(user.username),
-                            subtitle: Text(user.email),
-                            onTap: () {
-                              if (user.id.isEmpty) {
-                                print('Invalid user data: $user');
-                                return;
-                              }
-                              final chatController =
-                                  context.read<ChatController>();
-                              chatController.selectUser(user);
-                              print("navigating with user: ${user.id}");
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ChatScreen(user: user),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                ? const Center(child: Text('No users found'))
+                : ListView.builder(
+              itemCount: _filteredUsers.length,
+              itemBuilder: (context, index) {
+                final user = _filteredUsers[index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    child: Text(user.username[0].toUpperCase()),
+                  ),
+                  title: Text(user.username),
+                  subtitle: Text(user.email),
+                  onTap: () async {
+                    final roomId = await getOrCreateRoom(user.id);
+                    if (roomId != null) {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) =>
+                          ChatScreen(
+                              roomId: roomId, receiver: user
+                          ),
                       ),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),

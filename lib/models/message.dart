@@ -1,7 +1,9 @@
+import 'package:quick_chat/models/user.dart';
+
 class Message {
   final String id;
   final String chatRoom;
-  final String sender;
+  final User sender;
   final String content;
   final List<String> readBy;
   final DateTime createAt;
@@ -21,7 +23,7 @@ class Message {
     return Message(
       id: json['_id'],
       chatRoom: json['chatRoom'],
-      sender: json['sender'],
+      sender: User.fromJson(json['sender']),
       content: json['content'] ?? '',
       readBy: List<String>.from(json['readBy']),
       createAt: DateTime.parse(json['createdAt']),

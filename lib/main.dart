@@ -24,7 +24,6 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController(authService: authService, apiService: apiService)),
-        ChangeNotifierProvider(create: (_) => ChatController(apiService: apiService, socketService: socketService, authService: authService)),
       ],
       child: MyApp(authService: authService),
     ),

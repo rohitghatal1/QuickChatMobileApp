@@ -1,34 +1,51 @@
 import 'package:quick_chat/models/message.dart';
+import 'package:quick_chat/models/user.dart';
 
 class ChatRoom {
   final String id;
-  final String? name;
-  final bool isGroup;
-  final List<String> participants;
-  final String? admin;
+  final List<User> participants;
   final Message? lastMessage;
+  final bool isGroup;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   ChatRoom({
     required this.id,
-    this.name,
-    required this.isGroup,
     required this.participants,
-    this.admin,
     this.lastMessage,
+    required this.isGroup,
     required this.createdAt,
-    required this.updatedAt
-});
+    required this.updatedAt,
+  });
 
-  factory ChatRoom.fromJson(Map<String, dynamic> json){
+  factory ChatRoom.fromJson(Map<String, dynamic> json) {
+    // Handle participants - they should be User objects
+    List<User> participants = [];
+    if (json['participants'] is List) {
+      participants = (json['participants'] as List).map((participant) {
+        if (participant is String) {
+          // If participant is just an ID string, create a minimal User object
+          return User(
+            id: participant,
+            name: '',
+            username: '',
+            number: '',
+            email: '',
+          );
+        } else {
+          // If participant is a full user object
+          return User.fromJson(participant);
+        }
+      }).toList();
+    }
+
     return ChatRoom(
       id: json['_id'],
-      name: json['name'],
-      isGroup: json['isGroup'],
-      participants: List<String>.from(json['participants']),
-      admin: json['admin'],
-      lastMessage: json['lastMessage'] != null ? Message.fromJson(json['lastMessage']) : null,
+      participants: participants,
+      lastMessage: json['lastMessage'] != null
+          ? Message.fromJson(json['lastMessage'])
+          : null,
+      isGroup: json['isGroup'] ?? false,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );

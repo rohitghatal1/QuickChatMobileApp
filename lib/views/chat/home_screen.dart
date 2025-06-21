@@ -1,13 +1,7 @@
-import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:quick_chat/models/message.dart';
-
-import '../../controllers/auth_controller.dart';
-import '../../controllers/chat_controller.dart';
-import '../../utils/Dio/myDio.dart';
+import 'package:quick_chat/models/user.dart';
+import 'package:quick_chat/utils/Dio/myDio.dart';
+import '../../models/ChatRoom.dart';
 import '../auth/login_screen.dart';
 import '../pages/my_profile.dart';
 import '../pages/new_chat_screen.dart';
@@ -21,53 +15,76 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Message> _allMessages = [];
+  List<ChatRoom> _chatRooms = [];
   bool _isLoading = true;
+  late User currentUser;
 
   @override
   void initState() {
     super.initState();
-    _getMyChats();
+    _fetchMyChatRooms();
+    getLoggedInUser();
+    _fetchMyChatRooms();
   }
 
-  Future<void> _getMyChats() async {
+  Future<void> getLoggedInUser() async {
     try {
       final dio = await MyDio().getDio();
-      final response = await dio.get("/chat/message/getMyMessages");
-
-      if(response.data != null){
-        final List<Message> messages = (response.data as List).map((json) => Message.fromJson(json)).toList();
-
-        setState(() {
-          _allMessages = messages;
-          _isLoading = false;
-        });
-      }
-      // Handle or parse response if needed
-      print("Fetched chats: ${response.data}");
-    } catch (err) {
+      final response = await dio.get("/users/auth/me");
       setState(() {
-        _isLoading = false;
+        currentUser = User.fromJson(response.data);
       });
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No chats found")),
+        const SnackBar(content: Text('Failed to fetch current user data')),
       );
     }
   }
 
-  Future<void> _handleLogout(BuildContext context) async {
-    final authController = Provider.of<AuthController>(context, listen: false);
-    await authController.logout();
+  Future<void> _fetchMyChatRooms() async {
+    try {
+      final dio = await MyDio().getDio();
+      final response = await dio.get("chat/room/getMyChatRooms");
 
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
-    );
+      if (response.data != null) {
+        final List<ChatRoom> rooms = (response.data as List)
+            .map((json) => ChatRoom.fromJson(json))
+            .toList();
+
+        setState(() {
+          _chatRooms = rooms;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to fetch chat rooms")),
+      );
+    }
+  }
+
+  // Helper function to get the other participant in a 1:1 chat
+  User? _getOtherParticipant(ChatRoom room) {
+    if (room.participants.length < 2) return null;
+
+    // Assuming you have the current user's ID stored
+    if (currentUser.id == null) return null;
+
+    try {
+      return room.participants.firstWhere(
+            (user) => user.id != currentUser.id,
+        orElse: () => room.participants.first,
+      );
+    } catch (e) {
+      return room.participants.isNotEmpty ? room.participants.first : null;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chats'),
@@ -92,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 await _handleLogout(context);
               } else if (value == 'myProfile') {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => ProfileScreen()),
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
                 );
               }
             },
@@ -101,27 +118,46 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _allMessages.isEmpty
-          ? _buildEmptyState(context)
+          : _chatRooms.isEmpty
+          ? _buildEmptyState()
           : ListView.builder(
-        itemCount: _allMessages.length,
+        itemCount: _chatRooms.length,
         itemBuilder: (context, index) {
-          final message = _allMessages[index];
+          final room = _chatRooms[index];
+          final otherUser = _getOtherParticipant(room);
+
+          if (otherUser == null) {
+            return const ListTile(
+              title: Text('Unknown user'),
+            );
+          }
+
           return ListTile(
             leading: CircleAvatar(
-                child: Text(
-                  message.sender.username.isNotEmpty
-                      ? message.sender.username[0].toUpperCase()
-                      : '?',
-                ),
+              child: Text(
+                otherUser.username.isNotEmpty
+                    ? otherUser.username[0].toUpperCase()
+                    : '?',
+              ),
             ),
-            title: Text(message.receiver.username),
-            subtitle: Text('From : ${message.sender?.username ?? "Unknown"}'),
+            title: Text(otherUser.username.isNotEmpty
+                ? otherUser.username
+                : otherUser.name.isNotEmpty
+                ? otherUser.name
+                : 'Unknown'),
+            subtitle: Text(
+              room.lastMessage?.content ?? 'No messages yet',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ChatScreen(user: message.receiver),
+                  builder: (_) => ChatScreen(
+                    roomId: room.id,
+                    receiver: otherUser,
+                  ),
                 ),
               );
             },
@@ -133,33 +169,41 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => NewChatScreen()),
+            MaterialPageRoute(builder: (_) => const NewChatScreen()),
           );
         },
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.chat_bubble_outline, size: 100, color: Colors.grey),
           const SizedBox(height: 20),
-          const Text('No chats yet', style: TextStyle(fontSize: 18)),
+          const Text('No chat rooms yet', style: TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
           TextButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => NewChatScreen()),
+                MaterialPageRoute(builder: (_) => const NewChatScreen()),
               );
             },
             child: const Text('START NEW CHAT'),
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    // Clear storage, token or auth info here if needed
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
     );
   }
 }

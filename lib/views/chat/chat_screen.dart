@@ -1,14 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:quick_chat/models/message.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
 
-import '../../../controllers/chat_controller.dart';
 import '../../../models/user.dart';
 import '../../widgets/chat_bubble.dart';
 
 class ChatScreen extends StatefulWidget {
-  final User user;
-  const ChatScreen({Key? key, required this.user}) : super(key: key);
+  final String roomId;
+  final User receiver;
+
+  const ChatScreen({Key? key, required this.roomId, required this.receiver})
+      : super(key: key);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -16,26 +20,76 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
+  List<Message> _messages = [];
+  bool _isLoading = true;
+  late User currentUser;
 
+  @override
+  void initState() {
+    super.initState();
+    getLoggedInUser();
+  }
 
-  Future<void> _sendMessage() async{
+  Future<void> getLoggedInUser() async {
+    try {
+      final dio = await MyDio().getDio();
+      final response = await dio.get("/users/auth/me");
+      setState(() {
+        currentUser = User.fromJson(response.data);
+      });
+      fetchMessages(widget.roomId);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to fetch current user data')),
+      );
+    }
+  }
+
+  Future<void> fetchMessages(String roomId) async {
+    try {
+      final dio = await MyDio().getDio();
+      final response = await dio.get("/chat/room/$roomId/messages");
+
+      final List<Message> messages = (response.data as List)
+          .map((json) => Message.fromJson(json))
+          .toList();
+
+      setState(() {
+        _messages = messages.reversed.toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to fetch messages')),
+      );
+    }
+  }
+
+  Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
-    if(content.isEmpty) return;
+    if (content.isEmpty) return;
 
-    try{
-      final response = await (await(MyDio().getDio())).post("/chat/sendMessage", data: {
-        "receiverId" : widget.user.id,
+    try {
+      final dio = await MyDio().getDio();
+      final response = await dio.post("/chat/sendMessage", data: {
+        "roomId": widget.roomId,
         "content": content,
       });
 
       _messageController.clear();
-  } catch(e){
-      print("message sending error: $e");
+
+      final newMessage = Message.fromJson(response.data);
+      setState(() {
+        _messages.insert(0, newMessage);
+      });
+    } catch (e) {
+      print("Message sending error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cannot send message')),
+        const SnackBar(content: Text('Cannot send message')),
       );
+    }
   }
-}
+
   @override
   void dispose() {
     _messageController.dispose();
@@ -44,39 +98,38 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chatController = Provider.of<ChatController>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
             CircleAvatar(
-              child: Text(widget.user.username[0].toUpperCase()),
+              child: Text(widget.receiver.username[0].toUpperCase()),
             ),
             const SizedBox(width: 10),
-            Text(widget.user.username),
+            Text(widget.receiver.username),
           ],
         ),
       ),
-
       body: Column(
         children: [
           Expanded(
-            child: chatController.messages.isEmpty
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _messages.isEmpty
                 ? _buildEmptyChatState()
                 : ListView.builder(
               reverse: true,
-              itemCount: chatController.messages.length,
+              itemCount: _messages.length,
               itemBuilder: (context, index) {
-                final message = chatController.messages.reversed.toList()[index];
+                final message = _messages[index];
                 return ChatBubble(
                   message: message,
-                  isMe: message.sender.id == chatController.currentUserId,
+                  isMe: message.sender == currentUser.id,
                 );
               },
             ),
           ),
-          _buildMessageInput(chatController),
+          _buildMessageInput(),
         ],
       ),
     );
@@ -90,7 +143,7 @@ class _ChatScreenState extends State<ChatScreen> {
           const Icon(Icons.chat_bubble_outline, size: 100, color: Colors.grey),
           const SizedBox(height: 20),
           Text(
-            'No messages with ${widget.user.username} yet',
+            'No messages with ${widget.receiver.username} yet',
             style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 10),
@@ -100,7 +153,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildMessageInput(ChatController chatController) {
+  Widget _buildMessageInput() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -117,11 +170,10 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.send),
-            onPressed: () => _sendMessage(),
+            onPressed: _sendMessage,
           ),
         ],
       ),
     );
   }
-
 }
