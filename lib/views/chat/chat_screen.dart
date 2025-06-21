@@ -143,7 +143,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 final message = _messages[index];
                 return ChatBubble(
                   message: message,
-                  isMe: message.sender == currentUser.id,
+                  isMe: message.sender.id == currentUser.id,
                 );
               },
             ),
