@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -24,11 +25,18 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isLoading = true;
   late User currentUser;
 
+  Timer? _messageRefreshTimer;
+
   @override
   void initState() {
     super.initState();
     getLoggedInUser();
+
+    _messageRefreshTimer = Timer.periodic(Duration(seconds: 3), (timer){
+      fetchMessages(widget.roomId);
+    });
   }
+
 
   Future<void> getLoggedInUser() async {
     try {
@@ -50,17 +58,13 @@ class _ChatScreenState extends State<ChatScreen> {
       final dio = await MyDio().getDio();
       final response = await dio.get("/chat/room/$roomId/messages");
 
-      // Debug: Print raw response string
-      print("Raw response string: ${response.data}");
 
       // Parse the response
       final List<dynamic> messageList = response.data;
-      print("Parsed as List: $messageList");
 
       // Convert each message
       final List<Message> messages = messageList.map((messageJson) {
         try {
-          print("Processing message: $messageJson");
           return Message.fromJson(messageJson);
         } catch (e, stack) {
           print("Error parsing message $messageJson: $e\n$stack");
@@ -112,6 +116,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _messageController.dispose();
+    _messageRefreshTimer?.cancel();
     super.dispose();
   }
 

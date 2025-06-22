@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:quick_chat/models/user.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
@@ -19,12 +21,24 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   late User currentUser;
 
+  Timer? _chatRoomRefreshTimer;
+
   @override
   void initState() {
     super.initState();
     _fetchMyChatRooms();
     getLoggedInUser();
     _fetchMyChatRooms();
+
+    _chatRoomRefreshTimer = Timer.periodic(Duration(seconds: 5), (timer){
+      _fetchMyChatRooms();
+    });
+  }
+
+  @override
+  void dispose(){
+    _chatRoomRefreshTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> getLoggedInUser() async {
