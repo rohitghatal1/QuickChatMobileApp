@@ -48,6 +48,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 16,
             children: [
               TextFormField(
                 controller: currentPasswordController,
