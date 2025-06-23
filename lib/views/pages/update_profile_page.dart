@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
+import 'package:quick_chat/views/pages/my_profile.dart';
 
 class UpdateProfilePage extends StatefulWidget {
   const UpdateProfilePage({Key? key}) : super(key: key);
@@ -29,6 +30,12 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Prile updated successfylly")));
+      
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ProfileScreen()),
+      );
+
     } catch (e) {
       print("Failed to update profile: $e");
       ScaffoldMessenger.of(context)
@@ -67,7 +74,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
               ElevatedButton(
                   onPressed: updateProfile,
                   child:
-                      _isLoading ? CircularProgressIndicator() : Text("Updte"))
+                      _isLoading ? CircularProgressIndicator() : Text("Update"))
             ],
           ),
         ),
