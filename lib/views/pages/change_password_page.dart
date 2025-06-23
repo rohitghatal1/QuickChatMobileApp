@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
+import 'package:quick_chat/views/pages/my_profile.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({Key? key}) : super (key: key);
@@ -28,6 +29,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Password changed successfully")));
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (cotext) => ProfileScreen()),
+      );
+
     } catch (e) {
       print("Error changing password: $e");
       ScaffoldMessenger.of(context).showSnackBar(
