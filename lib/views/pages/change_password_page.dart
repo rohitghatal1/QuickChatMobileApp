@@ -34,7 +34,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         context,
         MaterialPageRoute(builder: (cotext) => ProfileScreen()),
       );
-
     } catch (e) {
       print("Error changing password: $e");
       ScaffoldMessenger.of(context).showSnackBar(

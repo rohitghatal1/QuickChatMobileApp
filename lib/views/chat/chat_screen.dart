@@ -32,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     getLoggedInUser();
 
-    _messageRefreshTimer = Timer.periodic(Duration(seconds: 3), (timer){
+    _messageRefreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchMessages(widget.roomId);
     });
   }

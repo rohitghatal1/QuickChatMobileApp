@@ -30,13 +30,13 @@ class _HomeScreenState extends State<HomeScreen> {
     getLoggedInUser();
     _fetchMyChatRooms();
 
-    _chatRoomRefreshTimer = Timer.periodic(Duration(seconds: 5), (timer){
+    _chatRoomRefreshTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       _fetchMyChatRooms();
     });
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _chatRoomRefreshTimer?.cancel();
     super.dispose();
   }
@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       return room.participants.firstWhere(
-            (user) => user.id != currentUser.id,
+        (user) => user.id != currentUser.id,
         orElse: () => room.participants.first,
       );
     } catch (e) {
@@ -134,51 +134,51 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _chatRooms.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-        itemCount: _chatRooms.length,
-        itemBuilder: (context, index) {
-          final room = _chatRooms[index];
-          final otherUser = _getOtherParticipant(room);
+              ? _buildEmptyState()
+              : ListView.builder(
+                  itemCount: _chatRooms.length,
+                  itemBuilder: (context, index) {
+                    final room = _chatRooms[index];
+                    final otherUser = _getOtherParticipant(room);
 
-          if (otherUser == null) {
-            return const ListTile(
-              title: Text('Unknown user'),
-            );
-          }
+                    if (otherUser == null) {
+                      return const ListTile(
+                        title: Text('Unknown user'),
+                      );
+                    }
 
-          return ListTile(
-            leading: CircleAvatar(
-              child: Text(
-                otherUser.username.isNotEmpty
-                    ? otherUser.username[0].toUpperCase()
-                    : '?',
-              ),
-            ),
-            title: Text(otherUser.username.isNotEmpty
-                ? otherUser.username
-                : otherUser.name.isNotEmpty
-                ? otherUser.name
-                : 'Unknown'),
-            subtitle: Text(
-              room.lastMessage?.content ?? 'No messages yet',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ChatScreen(
-                    roomId: room.id,
-                    receiver: otherUser,
-                  ),
+                    return ListTile(
+                      leading: CircleAvatar(
+                        child: Text(
+                          otherUser.username.isNotEmpty
+                              ? otherUser.username[0].toUpperCase()
+                              : '?',
+                        ),
+                      ),
+                      title: Text(otherUser.username.isNotEmpty
+                          ? otherUser.username
+                          : otherUser.name.isNotEmpty
+                              ? otherUser.name
+                              : 'Unknown'),
+                      subtitle: Text(
+                        room.lastMessage?.content ?? 'No messages yet',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatScreen(
+                              roomId: room.id,
+                              receiver: otherUser,
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-              );
-            },
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.chat),
         onPressed: () {
@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Clear storage, token or auth info here if needed
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 }
