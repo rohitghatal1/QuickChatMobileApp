@@ -27,7 +27,7 @@ class ChatBubble extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment:
-          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Text(
               message.content,
