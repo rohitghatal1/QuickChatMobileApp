@@ -30,12 +30,11 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Prile updated successfylly")));
-      
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ProfileScreen()),
-      );
 
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => ProfileScreen()),
+      );
     } catch (e) {
       print("Failed to update profile: $e");
       ScaffoldMessenger.of(context)
@@ -62,19 +61,19 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                 controller: _nameController,
                 decoration: InputDecoration(labelText: 'Name'),
                 validator: (val) =>
-                    val == null || val.isEmpty ? 'Please enter name' : null,
+                val == null || val.isEmpty ? 'Please enter name' : null,
               ),
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(labelText: 'Email'),
                 validator: (val) =>
-                    val == null || val.isEmpty ? "Plese enter email" : null,
+                val == null || val.isEmpty ? "Plese enter email" : null,
               ),
               SizedBox(height: 20),
               ElevatedButton(
                   onPressed: updateProfile,
                   child:
-                      _isLoading ? CircularProgressIndicator() : Text("Update"))
+                  _isLoading ? CircularProgressIndicator() : Text("Update"))
             ],
           ),
         ),

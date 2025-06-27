@@ -5,7 +5,7 @@ import '../../controllers/auth_controller.dart';
 import '../../controllers/chat_controller.dart';
 import '../auth/login_screen.dart';
 
-class ProfileScreen extends StatelessWidget{
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   Future<void> _handleLogout(BuildContext context) async {
@@ -20,7 +20,6 @@ class ProfileScreen extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-
     //sample data
     final String name = 'Rohit Ghatal';
     final int number = 980645229;
@@ -42,17 +41,27 @@ class ProfileScreen extends StatelessWidget{
             ),
             Text(
               name,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
               '$number',
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .bodyLarge,
             ),
             Text(
               email,
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .bodyLarge,
             ),
             Divider(height: 32),
 
@@ -60,22 +69,23 @@ class ProfileScreen extends StatelessWidget{
               leading: Icon(Icons.lock),
               title: Text('Change Password'),
               trailing: Icon(Icons.arrow_forward_ios, size: 16,),
-              onTap: (){},
+              onTap: () {},
             ),
             ListTile(
               leading: Icon(Icons.settings),
               title: Text('Settings'),
               trailing: Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: (){},
+              onTap: () {},
             ),
 
             ElevatedButton.icon(
-              icon: Icon(Icons.logout),
+                icon: Icon(Icons.logout),
                 label: Text('Logout'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () => _handleLogout(context)
             )
@@ -83,6 +93,5 @@ class ProfileScreen extends StatelessWidget{
         ),
       ),
     );
-
   }
 }

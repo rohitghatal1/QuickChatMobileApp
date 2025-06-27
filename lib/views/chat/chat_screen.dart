@@ -142,7 +142,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 : _messages.isEmpty
                 ? _buildEmptyChatState()
                 : ListView.builder(
-              reverse: true,
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
