@@ -22,41 +22,43 @@ class _LoginScreenState extends State<LoginScreen> {
   final _numberController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  Future<void> _login() async{
-    if(!_formKey.currentState!.validate()) return;
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
 
     final int? number = int.tryParse(_numberController.text.trim());
-    if(number == null){
+    if (number == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter a valid number")),
       );
       return;
     }
-    try{
-      final response = await (await (MyDio().getDio())).post("/auth/login", data:{
+    try {
+      final response =
+          await (await (MyDio().getDio())).post("/auth/login", data: {
         "number": number,
         "password": _passwordController.text.trim(),
       });
 
       final token = response.data["token"];
-      if(token != null){
+      if (token != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("quickChatAccessToken", token);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => HomeScreen()),
         );
-      } else{
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login failed: token missing")),
         );
       }
-    } catch(e){
+    } catch (e) {
       print("Login error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login failed")),
       );
     }
   }
+
   @override
   void dispose() {
     _numberController.dispose();
@@ -67,7 +69,10 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login'), backgroundColor: Colors.teal,),
+      appBar: AppBar(
+        title: const Text('Login'),
+        backgroundColor: Colors.teal,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -103,10 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              CustomButton(
-                  onPressed: _login,
-                  text: 'login'
-              ),
+              CustomButton(onPressed: _login, text: 'login'),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () {
