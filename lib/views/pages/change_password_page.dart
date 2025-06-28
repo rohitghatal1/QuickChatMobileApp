@@ -3,7 +3,7 @@ import 'package:quick_chat/utils/Dio/myDio.dart';
 import 'package:quick_chat/views/pages/my_profile.dart';
 
 class ChangePasswordPage extends StatefulWidget {
-  const ChangePasswordPage({Key? key}) : super (key: key);
+  const ChangePasswordPage({Key? key}) : super(key: key);
 
   @override
   State<ChangePasswordPage> createState() => _ChangePasswordPageState();
@@ -46,7 +46,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Change Password"),),
+      appBar: AppBar(
+        title: Text("Change Password"),
+      ),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Form(
@@ -60,8 +62,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 controller: currentPasswordController,
                 decoration: InputDecoration(labelText: 'Current Password'),
                 obscureText: true,
-                validator: (val) =>
-                val == null || val.isEmpty
+                validator: (val) => val == null || val.isEmpty
                     ? 'Current password required'
                     : null,
               ),
@@ -69,15 +70,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 controller: newPasswordController,
                 decoration: InputDecoration(labelText: 'New password'),
                 obscureText: true,
-                validator: (val) =>
-                val == null || val.length < 6
+                validator: (val) => val == null || val.length < 6
                     ? 'Minimum 6 chats required'
                     : null,
               ),
               const SizedBox(height: 20),
-              ElevatedButton(onPressed: _isLoading ? null : changePassword,
-                  child: _isLoading ? CircularProgressIndicator() : Text(
-                      'Change Password'))
+              ElevatedButton(
+                  onPressed: _isLoading ? null : changePassword,
+                  child: _isLoading
+                      ? CircularProgressIndicator()
+                      : Text('Change Password'))
             ],
           ),
         ),
