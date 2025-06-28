@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/auth_controller.dart';
-import '../../controllers/chat_controller.dart';
 import '../auth/login_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _handleLogout(BuildContext context) async {
     final authController = Provider.of<AuthController>(context, listen: false);
 
@@ -15,7 +19,7 @@ class ProfileScreen extends StatelessWidget {
 
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
-            (route) => false);
+        (route) => false);
   }
 
   @override
@@ -41,34 +45,26 @@ class ProfileScreen extends StatelessWidget {
             ),
             Text(
               name,
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             Text(
               '$number',
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .bodyLarge,
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             Text(
               email,
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .bodyLarge,
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             Divider(height: 32),
-
             ListTile(
               leading: Icon(Icons.lock),
               title: Text('Change Password'),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16,),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+              ),
               onTap: () {},
             ),
             ListTile(
@@ -77,7 +73,6 @@ class ProfileScreen extends StatelessWidget {
               trailing: Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {},
             ),
-
             ElevatedButton.icon(
                 icon: Icon(Icons.logout),
                 label: Text('Logout'),
@@ -87,8 +82,7 @@ class ProfileScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => _handleLogout(context)
-            )
+                onPressed: () => _handleLogout(context))
           ],
         ),
       ),
