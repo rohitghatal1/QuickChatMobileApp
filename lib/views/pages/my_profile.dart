@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_chat/utils/Dio/myDio.dart';
+import 'package:quick_chat/views/pages/update_profile_page.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../auth/login_screen.dart';
@@ -12,6 +14,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  Map<String, dynamic>? user;
+  bool _isLoading = true;
+
+  Future<void> getLoggedInUserData() async {
+    try {
+      final dio = await MyDio().getDio();
+      final response = await dio.get('/users/auth/me');
+      setState(() {
+        user = response.data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("error: $e");
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error fetching users')));
+    }
+  }
+
   Future<void> _handleLogout(BuildContext context) async {
     final authController = Provider.of<AuthController>(context, listen: false);
 
@@ -23,69 +43,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    //sample data
-    final String name = 'Rohit Ghatal';
-    final int number = 980645229;
-    final String email = 'rohitghatal@gmail.com';
+  void initState() {
+    super.initState();
+    getLoggedInUserData();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('My Profile'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          spacing: 20,
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/images/quickChatImage.png'),
-            ),
-            Text(
-              name,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+      body: _isLoading
+          ? CircularProgressIndicator()
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                spacing: 20,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage:
+                        AssetImage('assets/images/quickChatImage.png'),
                   ),
-            ),
-            Text(
-              '$number',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            Text(
-              email,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            Divider(height: 32),
-            ListTile(
-              leading: Icon(Icons.lock),
-              title: Text('Change Password'),
-              trailing: Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
+                  Text(
+                    user!['name'] ?? '',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  Text(
+                    user!['number'] ?? '',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Text(
+                    user!['email'] ?? '',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Divider(height: 32),
+                  ListTile(
+                    leading: Icon(Icons.lock),
+                    title: Text('Change Password'),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                    ),
+                    onTap: () async {
+                      final updated = Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UpdateProfilePage()),
+                      );
+                      if (updated == true) {
+                        getLoggedInUserData();
+                      }
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.settings),
+                    title: Text('Settings'),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {},
+                  ),
+                  ElevatedButton.icon(
+                      icon: Icon(Icons.logout),
+                      label: Text('Logout'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () => _handleLogout(context))
+                ],
               ),
-              onTap: () {},
             ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {},
-            ),
-            ElevatedButton.icon(
-                icon: Icon(Icons.logout),
-                label: Text('Logout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () => _handleLogout(context))
-          ],
-        ),
-      ),
     );
   }
 }
