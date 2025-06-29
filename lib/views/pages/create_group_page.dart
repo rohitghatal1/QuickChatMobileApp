@@ -9,6 +9,12 @@ class CreateGroupPage extends StatefulWidget {
 class _CreateGroupPageState extends State<CreateGroupPage> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    return  Scaffold(
+      appBar: AppBar(
+        title: Text('Create Group'),
+        centerTitle: true,
+      ),
+      body: Container(),
+    );
   }
 }
