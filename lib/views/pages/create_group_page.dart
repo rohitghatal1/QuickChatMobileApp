@@ -14,7 +14,7 @@ class CreateGroupPage extends StatefulWidget {
 
 class _CreateGroupPageState extends State<CreateGroupPage> {
   final TextEditingController _groupNameController = TextEditingController();
-  List<Map<String, String>> users = [];
+  List<User> users = [];
   List<String> selectedUserIds = [];
   bool isLoading = false;
 
@@ -29,11 +29,11 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
       final dio = await MyDio().getDio();
       final response = await dio.get("/users/getUsers");
       if (response.data != null) {
-        List<User> users =
+        List<User> fetchedUsers =
         (response.data as List).map((json) => User.fromJson(json)).toList();
 
         setState(() {
-          users = users;
+          users = fetchedUsers;
           isLoading = false;
         });
       } else {
@@ -54,7 +54,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
     setState(() => isLoading = true);
 
     final dio = await MyDio().getDio();
-    final response = await dio.post('/users/groups/create', data: {
+    final response = await dio.post('/groups/createGroup', data: {
       "groupName": _groupNameController.text,
       "participantIds": selectedUserIds,
     });
@@ -89,14 +89,14 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                 child: ListView(
                   children: users.map((user) {
                     return CheckboxListTile(
-                        title: Text(user['name']!),
-                        value: selectedUserIds.contains(user['id']),
+                        title: Text(user.name!),
+                        value: selectedUserIds.contains(user.id),
                         onChanged: (bool? value) {
                           setState(() {
                             if (value == true) {
-                              selectedUserIds.add(user['id']!);
+                              selectedUserIds.add(user.id!);
                             } else {
-                              selectedUserIds.remove(user['id']);
+                              selectedUserIds.remove(user.id);
                             }
                           });
                         });
