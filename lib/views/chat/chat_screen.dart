@@ -11,8 +11,15 @@ import '../../widgets/chat_bubble.dart';
 class ChatScreen extends StatefulWidget {
   final String roomId;
   final User receiver;
+  final bool isGroup;
+  final String? groupName;
 
-  const ChatScreen({Key? key, required this.roomId, required this.receiver})
+  const ChatScreen(
+      {Key? key,
+      required this.roomId,
+      required this.receiver,
+      this.isGroup = false,
+      this.groupName})
       : super(key: key);
 
   @override
@@ -37,7 +44,6 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-
   Future<void> getLoggedInUser() async {
     try {
       final dio = await MyDio().getDio();
@@ -57,7 +63,6 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final dio = await MyDio().getDio();
       final response = await dio.get("/chat/room/$roomId/messages");
-
 
       // Parse the response
       final List<dynamic> messageList = response.data;
@@ -92,10 +97,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       final dio = await MyDio().getDio();
-      final response = await dio.post("/chat/sendMessage", data: {
+      final sendMsgUrl = widget.isGroup ? "/groups/sendGroupMessage" : "/chat/sendMessage";
+      final dataToSend = widget.isGroup ? {
         "roomId": widget.roomId,
         "content": content,
-      });
+        "senderId": currentUser.id,
+      } : {
+        "roomId": widget.roomId,
+        "content": content,
+      };
+      final response = await dio.post(sendMsgUrl, data: dataToSend);
       print('response received: ${response.data}');
       print('Type of data: ${response.data.runtimeType}');
 
@@ -127,10 +138,14 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Row(
           children: [
             CircleAvatar(
-              child: Text(widget.receiver.username[0].toUpperCase()),
+              child: Text(widget.isGroup
+                  ? (widget.groupName?[0].toUpperCase() ?? "G")
+                  : widget.receiver.username[0].toUpperCase()),
             ),
             const SizedBox(width: 10),
-            Text(widget.receiver.username),
+            Text(widget.isGroup
+                ? widget.groupName ?? "Group Chat"
+                : widget.receiver.username),
           ],
         ),
       ),
@@ -140,17 +155,17 @@ class _ChatScreenState extends State<ChatScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _messages.isEmpty
-                ? _buildEmptyChatState()
-                : ListView.builder(
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                return ChatBubble(
-                  message: message,
-                  isMe: message.sender.id == currentUser.id,
-                );
-              },
-            ),
+                    ? _buildEmptyChatState()
+                    : ListView.builder(
+                        itemCount: _messages.length,
+                        itemBuilder: (context, index) {
+                          final message = _messages[index];
+                          return ChatBubble(
+                            message: message,
+                            isMe: message.sender.id == currentUser.id,
+                          );
+                        },
+                      ),
           ),
           _buildMessageInput(),
         ],

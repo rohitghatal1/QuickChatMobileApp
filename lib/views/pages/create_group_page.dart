@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:quick_chat/models/user.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
+
+import '../../models/user.dart';
 
 class CreateGroupPage extends StatefulWidget {
   const CreateGroupPage({Key? key}) : super(key: key);
@@ -28,8 +28,16 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
     try{
       final dio = await MyDio().getDio();
       final response = await dio.get("/users/getUsers");
-      if(response.data != null){
-       users = response.data;
+      if (response.data != null) {
+        List<User> users =
+        (response.data as List).map((json) => User.fromJson(json)).toList();
+
+        setState(() {
+          users = users;
+          isLoading = false;
+        });
+      } else {
+        throw Exception("Failed to fetch users");
       }
     } catch(e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to fetch users')));

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:quick_chat/models/user.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
+import 'package:quick_chat/views/pages/create_group_page.dart';
 import '../../models/ChatRoom.dart';
 import '../auth/login_screen.dart';
 import '../pages/my_profile.dart';
@@ -112,6 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context) =>
             [
               const PopupMenuItem(
+                child: Text('Create new Group'),
+                value: 'createGroup',
+              ),
+              const PopupMenuItem(
                 child: Text('Logout'),
                 value: 'logout',
               ),
@@ -126,6 +131,10 @@ class _HomeScreenState extends State<HomeScreen> {
               } else if (value == 'myProfile') {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              } else if (value == 'createGroup'){
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const CreateGroupPage())
                 );
               }
             },
