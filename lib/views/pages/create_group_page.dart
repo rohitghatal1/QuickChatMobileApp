@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:quick_chat/models/user.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
 
 class CreateGroupPage extends StatefulWidget {
@@ -11,8 +14,27 @@ class CreateGroupPage extends StatefulWidget {
 
 class _CreateGroupPageState extends State<CreateGroupPage> {
   final TextEditingController _groupNameController = TextEditingController();
+  List<Map<String, String>> users = [];
   List<String> selectedUserIds = [];
   bool isLoading = false;
+
+  @override
+  void initState(){
+    super.initState();
+    getUsers();
+  }
+
+  Future<void> getUsers() async {
+    try{
+      final dio = await MyDio().getDio();
+      final response = await dio.get("/users/getUsers");
+      if(response.data != null){
+       users = response.data;
+      }
+    } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to fetch users')));
+    }
+  }
 
   void createGroup() async {
     if (_groupNameController.text.isEmpty || selectedUserIds.length < 2) {
@@ -41,7 +63,6 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, String>> users = [];
 
     return Scaffold(
         appBar: AppBar(
