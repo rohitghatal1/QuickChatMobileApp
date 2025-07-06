@@ -18,9 +18,10 @@ class ChatBubble extends StatelessWidget {
     final formattedTime = DateFormat('hh:mm a').format(message.createAt.toLocal());
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: FractionallySizedBox(
-        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-        widthFactor: 0.8,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.8
+        ),
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
