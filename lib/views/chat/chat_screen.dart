@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:quick_chat/models/message.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
@@ -13,6 +14,7 @@ class ChatScreen extends StatefulWidget {
   final User receiver;
   final bool isGroup;
   final String? groupName;
+
 
   const ChatScreen(
       {Key? key,
@@ -31,7 +33,8 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Message> _messages = [];
   bool _isLoading = true;
   late User currentUser;
-
+  final player = AudioPlayer();
+  final ScrollController scrollController = ScrollController();
   Timer? _messageRefreshTimer;
 
   @override
@@ -117,6 +120,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       _messageController.clear();
 
+      await player.play(AssetSource('sounds/sendMsgPopSound.mp3'));
       final newMessage = Message.fromJson(response.data);
       setState(() {
         _messages.insert(0, newMessage);

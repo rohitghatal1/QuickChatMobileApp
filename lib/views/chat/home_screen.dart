@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:quick_chat/models/user.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
@@ -21,6 +22,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<ChatRoom> _chatRooms = [];
   bool _isLoading = true;
   late User currentUser;
+
+  final player = AudioPlayer();
+  Map<String, String?> _previousLastMessageIds = {};
 
   Timer? _chatRoomRefreshTimer;
 
@@ -65,6 +69,19 @@ class _HomeScreenState extends State<HomeScreen> {
         final List<ChatRoom> rooms = (response.data as List)
             .map((json) => ChatRoom.fromJson(json))
             .toList();
+
+        for (final room in rooms){
+          final lastMessageid = room.lastMessage?.id;
+
+          if(lastMessageid != null){
+            final oldId = _previousLastMessageIds[room.id];
+            if(oldId != null && oldId != lastMessageid){
+              await player.play(AssetSource("/sounds/vibratingReceiveSound.mp3"));
+            }
+
+            _previousLastMessageIds[room.id] = lastMessageid;
+          }
+        }
 
         setState(() {
           _chatRooms = rooms;
