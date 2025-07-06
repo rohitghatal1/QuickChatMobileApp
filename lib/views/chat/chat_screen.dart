@@ -42,6 +42,8 @@ class _ChatScreenState extends State<ChatScreen> {
     _messageRefreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchMessages(widget.roomId);
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => scrollToBottom());
   }
 
   Future<void> getLoggedInUser() async {
@@ -77,6 +79,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       }).toList();
 
+      scrollToBottom();
       print("Successfully parsed ${messages.length} messages");
       setState(() {
         _messages = messages.reversed.toList();
@@ -90,6 +93,7 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     }
   }
+
 
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
@@ -109,6 +113,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final response = await dio.post(sendMsgUrl, data: dataToSend);
       print('response received: ${response.data}');
       print('Type of data: ${response.data.runtimeType}');
+      scrollToBottom();
 
       _messageController.clear();
 
@@ -122,6 +127,18 @@ class _ChatScreenState extends State<ChatScreen> {
         const SnackBar(content: Text('Cannot send message')),
       );
     }
+  }
+
+  void scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
