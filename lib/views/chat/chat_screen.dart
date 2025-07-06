@@ -41,6 +41,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     getLoggedInUser();
+    scrollToBottom();
 
     _messageRefreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchMessages(widget.roomId);
@@ -116,15 +117,15 @@ class _ChatScreenState extends State<ChatScreen> {
       final response = await dio.post(sendMsgUrl, data: dataToSend);
       print('response received: ${response.data}');
       print('Type of data: ${response.data.runtimeType}');
-      scrollToBottom();
 
       _messageController.clear();
 
       await player.play(AssetSource('sounds/sendMsgPopSound.mp3'));
       final newMessage = Message.fromJson(response.data);
       setState(() {
-        _messages.insert(0, newMessage);
+        _messages.insert(_messages.length, newMessage);
       });
+      scrollToBottom();
     } catch (e) {
       print("Message sending error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -134,7 +135,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 100), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
