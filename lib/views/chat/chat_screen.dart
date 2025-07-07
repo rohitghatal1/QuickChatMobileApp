@@ -15,7 +15,6 @@ class ChatScreen extends StatefulWidget {
   final bool isGroup;
   final String? groupName;
 
-
   const ChatScreen(
       {Key? key,
       required this.roomId,
@@ -98,22 +97,24 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
 
     try {
       final dio = await MyDio().getDio();
-      final sendMsgUrl = widget.isGroup ? "/groups/sendGroupMessage" : "/chat/sendMessage";
-      final dataToSend = widget.isGroup ? {
-        "roomId": widget.roomId,
-        "content": content,
-        "senderId": currentUser.id,
-      } : {
-        "roomId": widget.roomId,
-        "content": content,
-      };
+      final sendMsgUrl =
+          widget.isGroup ? "/groups/sendGroupMessage" : "/chat/sendMessage";
+      final dataToSend = widget.isGroup
+          ? {
+              "roomId": widget.roomId,
+              "content": content,
+              "senderId": currentUser.id,
+            }
+          : {
+              "roomId": widget.roomId,
+              "content": content,
+            };
       final response = await dio.post(sendMsgUrl, data: dataToSend);
       print('response received: ${response.data}');
       print('Type of data: ${response.data.runtimeType}');
