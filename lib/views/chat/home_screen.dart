@@ -133,12 +133,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 value: 'createGroup',
               ),
               const PopupMenuItem(
-                child: Text('Logout'),
-                value: 'logout',
-              ),
-              const PopupMenuItem(
                 child: Text('My Profile'),
                 value: 'myProfile',
+              ),
+              const PopupMenuItem(
+                child: Text('Logout'),
+                value: 'logout',
               ),
             ],
             onSelected: (value) async {

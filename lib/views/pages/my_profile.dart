@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
 import 'package:quick_chat/views/pages/change_password_page.dart';
+import 'package:quick_chat/views/pages/update_profile_page.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../auth/login_screen.dart';
@@ -102,6 +103,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
 
+                  ListTile(
+                    leading: Icon(Icons.person_outlined),
+                    title: Text('Update Profile'),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 16,),
+                    onTap: () async {
+                      final updated = Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+                      );
+
+                      if(updated == true){
+                        getLoggedInUserData();
+                      }
+                    },
+                  ),
                   ListTile(
                     leading: Icon(Icons.settings),
                     title: Text('Settings'),
