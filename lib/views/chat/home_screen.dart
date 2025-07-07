@@ -70,13 +70,14 @@ class _HomeScreenState extends State<HomeScreen> {
             .map((json) => ChatRoom.fromJson(json))
             .toList();
 
-        for (final room in rooms){
+        for (final room in rooms) {
           final lastMessageid = room.lastMessage?.id;
 
-          if(lastMessageid != null){
+          if (lastMessageid != null) {
             final oldId = _previousLastMessageIds[room.id];
-            if(oldId != null && oldId != lastMessageid){
-              await player.play(AssetSource("/sounds/vibratingReceiveSound.mp3"));
+            if (oldId != null && oldId != lastMessageid) {
+              await player
+                  .play(AssetSource("/sounds/vibratingReceiveSound.mp3"));
             }
 
             _previousLastMessageIds[room.id] = lastMessageid;

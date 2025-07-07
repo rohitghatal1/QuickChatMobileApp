@@ -83,7 +83,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Divider(height: 32),
-
                   ListTile(
                     leading: Icon(Icons.lock),
                     title: Text('Change Password'),
@@ -102,17 +101,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                     },
                   ),
-
                   ListTile(
                     leading: Icon(Icons.person_outlined),
                     title: Text('Update Profile'),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16,),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                    ),
                     onTap: () async {
                       final updated = Navigator.push(
-                        context, MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UpdateProfilePage()),
                       );
 
-                      if(updated == true){
+                      if (updated == true) {
                         getLoggedInUserData();
                       }
                     },
@@ -121,8 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     leading: Icon(Icons.settings),
                     title: Text('Settings'),
                     trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                    },
+                    onTap: () {},
                   ),
                   ElevatedButton.icon(
                       icon: Icon(Icons.logout),
