@@ -50,7 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => scrollToBottom());
   }
 
-  void onReplyMessage(Message message){
+  void onReplyMessage(Message message) {
     setState(() {
       replyingTo = message;
     });
@@ -191,8 +191,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         itemBuilder: (context, index) {
                           final message = _messages[index];
                           return GestureDetector(
-                            onHorizontalDragEnd: (details){
-                              if(details.primaryVelocity! > 0){
+                            onHorizontalDragEnd: (details) {
+                              if (details.primaryVelocity! > 0) {
                                 onReplyMessage(message);
                               }
                             },
@@ -204,20 +204,20 @@ class _ChatScreenState extends State<ChatScreen> {
                         },
                       ),
           ),
-          if(replyingTo != null) ...[
+          if (replyingTo != null) ...[
             Container(
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(color: Colors.grey[200]),
               child: Row(
                 children: [
                   Expanded(child: Text("Replying to: ${replyingTo!.content}")),
-                  IconButton(onPressed: () => setState(() => replyingTo = null),
+                  IconButton(
+                      onPressed: () => setState(() => replyingTo = null),
                       icon: Icon(Icons.close)),
                 ],
               ),
             )
           ],
-
           _buildMessageInput(),
         ],
       ),
