@@ -35,6 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final player = AudioPlayer();
   final ScrollController scrollController = ScrollController();
   Timer? _messageRefreshTimer;
+  Message? replyingTo;
 
   @override
   void initState() {
@@ -47,6 +48,12 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => scrollToBottom());
+  }
+
+  void onReplyMessage(Message message){
+    setState(() {
+      replyingTo = message;
+    });
   }
 
   Future<void> getLoggedInUser() async {
@@ -183,13 +190,34 @@ class _ChatScreenState extends State<ChatScreen> {
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final message = _messages[index];
-                          return ChatBubble(
-                            message: message,
-                            isMe: message.sender.id == currentUser.id,
+                          return GestureDetector(
+                            onHorizontalDragEnd: (details){
+                              if(details.primaryVelocity! > 0){
+                                onReplyMessage(message);
+                              }
+                            },
+                            child: ChatBubble(
+                              message: message,
+                              isMe: message.sender.id == currentUser.id,
+                            ),
                           );
                         },
                       ),
           ),
+          if(replyingTo != null) ...[
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(color: Colors.grey[200]),
+              child: Row(
+                children: [
+                  Expanded(child: Text("Replying to: ${replyingTo!.content}")),
+                  IconButton(onPressed: () => setState(() => replyingTo = null),
+                      icon: Icon(Icons.close)),
+                ],
+              ),
+            )
+          ],
+
           _buildMessageInput(),
         ],
       ),
