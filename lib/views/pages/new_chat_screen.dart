@@ -28,7 +28,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       final response = await (await (MyDio().getDio())).get("/users/getUsers");
       if (response.data != null) {
         final List<User> users =
-        (response.data as List).map((json) => User.fromJson(json)).toList();
+            (response.data as List).map((json) => User.fromJson(json)).toList();
 
         setState(() {
           _allUsers = users;
@@ -104,31 +104,32 @@ class _NewChatScreenState extends State<NewChatScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredUsers.isEmpty
-                ? const Center(child: Text('No users found'))
-                : ListView.builder(
-              itemCount: _filteredUsers.length,
-              itemBuilder: (context, index) {
-                final user = _filteredUsers[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    child: Text(user.username[0].toUpperCase()),
-                  ),
-                  title: Text(user.username),
-                  subtitle: Text(user.email),
-                  onTap: () async {
-                    final roomId = await getOrCreateRoom(user.id);
-                    if (roomId != null) {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) =>
-                          ChatScreen(
-                              roomId: roomId, receiver: user
-                          ),
+                    ? const Center(child: Text('No users found'))
+                    : ListView.builder(
+                        itemCount: _filteredUsers.length,
+                        itemBuilder: (context, index) {
+                          final user = _filteredUsers[index];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              child: Text(user.username[0].toUpperCase()),
+                            ),
+                            title: Text(user.username),
+                            subtitle: Text(user.email),
+                            onTap: () async {
+                              final roomId = await getOrCreateRoom(user.id);
+                              if (roomId != null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ChatScreen(
+                                        roomId: roomId, receiver: user),
+                                  ),
+                                );
+                              }
+                            },
+                          );
+                        },
                       ),
-                      );
-                    }
-                  },
-                );
-              },
-            ),
           ),
         ],
       ),
