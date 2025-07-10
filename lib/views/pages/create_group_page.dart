@@ -19,13 +19,13 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   bool isLoading = false;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     getUsers();
   }
 
   Future<void> getUsers() async {
-    try{
+    try {
       final dio = await MyDio().getDio();
       final response = await dio.get("/users/getUsers");
       if (response.data != null) {
@@ -39,8 +39,9 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
       } else {
         throw Exception("Failed to fetch users");
       }
-    } catch(e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to fetch users')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch users')));
     }
   }
 
@@ -71,7 +72,6 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         appBar: AppBar(
           title: Text('Create Group'),

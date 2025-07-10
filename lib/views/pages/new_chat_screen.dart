@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../../models/user.dart';
 import '../../utils/Dio/myDio.dart';
@@ -82,7 +81,6 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('New Chat'),
