@@ -26,7 +26,7 @@ class ChatScreen extends StatefulWidget {
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final _messageController = TextEditingController();
   List<Message> _messages = [];
   bool _isLoading = true;
@@ -36,17 +36,48 @@ class _ChatScreenState extends State<ChatScreen> {
   Timer? _messageRefreshTimer;
   Message? replyingTo;
 
+  late AnimationController _controller;
+  late Animation<Offset> _offsetAnimation;
+
+  double _dragExtent = 0.0;
+  bool _isReplyTriggered = false;
+
   @override
   void initState() {
     super.initState();
     getLoggedInUser();
     scrollToBottom();
 
+    _controller = AnimationController(vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+
+    _offsetAnimation = Tween<Offset>(
+      begin:  Offset.zero,
+      end: Offset(0.15, 0)
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
     _messageRefreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchMessages(widget.roomId);
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => scrollToBottom());
+  }
+
+  void _onHorizontalDragUpdate(DragUpdateDetails details, Message message){
+    _dragExtent += details.primaryDelta ?? 0;
+    if(_dragExtent > 60 && !_isReplyTriggered){
+      _isReplyTriggered = true;
+      _controller.forward().then((_){
+        _controller.reverse();
+        onReplyMessage(message);
+      });
+    }
+  }
+
+  void _onHorizontalDragEnd(DragEndDetails details) {
+    _dragExtent = 0;
+    _isReplyTriggered = false;
   }
 
   void onReplyMessage(Message message) {
@@ -157,6 +188,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _messageController.dispose();
     _messageRefreshTimer?.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -189,15 +221,15 @@ class _ChatScreenState extends State<ChatScreen> {
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final message = _messages[index];
-                          return GestureDetector(
-                            onHorizontalDragEnd: (details) {
-                              if (details.primaryVelocity! > 0) {
-                                onReplyMessage(message);
-                              }
-                            },
-                            child: ChatBubble(
-                              message: message,
-                              isMe: message.sender.id == currentUser.id,
+                          return SlideTransition(
+                            position: _offsetAnimation,
+                            child: GestureDetector(
+                             onHorizontalDragUpdate: (details) => _onHorizontalDragUpdate(details, message),
+                              onHorizontalDragEnd: _onHorizontalDragEnd,
+                              child: ChatBubble(
+                                message: message,
+                                isMe: message.sender.id == currentUser.id,
+                              ),
                             ),
                           );
                         },
