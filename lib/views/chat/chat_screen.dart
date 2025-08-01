@@ -48,14 +48,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     getLoggedInUser();
     scrollToBottom();
 
-    _controller = AnimationController(vsync: this,
+    _controller = AnimationController(
+      vsync: this,
       duration: const Duration(milliseconds: 150),
     );
 
-    _offsetAnimation = Tween<Offset>(
-      begin:  Offset.zero,
-      end: Offset(0.15, 0)
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _offsetAnimation = Tween<Offset>(begin: Offset.zero, end: Offset(0.15, 0))
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _messageRefreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchMessages(widget.roomId);
@@ -64,11 +63,11 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) => scrollToBottom());
   }
 
-  void _onHorizontalDragUpdate(DragUpdateDetails details, Message message){
+  void _onHorizontalDragUpdate(DragUpdateDetails details, Message message) {
     _dragExtent += details.primaryDelta ?? 0;
-    if(_dragExtent > 60 && !_isReplyTriggered){
+    if (_dragExtent > 60 && !_isReplyTriggered) {
       _isReplyTriggered = true;
-      _controller.forward().then((_){
+      _controller.forward().then((_) {
         _controller.reverse();
         onReplyMessage(message);
       });
@@ -224,7 +223,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           return SlideTransition(
                             position: _offsetAnimation,
                             child: GestureDetector(
-                             onHorizontalDragUpdate: (details) => _onHorizontalDragUpdate(details, message),
+                              onHorizontalDragUpdate: (details) =>
+                                  _onHorizontalDragUpdate(details, message),
                               onHorizontalDragEnd: _onHorizontalDragEnd,
                               child: ChatBubble(
                                 message: message,
