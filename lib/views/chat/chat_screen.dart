@@ -209,6 +209,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           ],
         ),
       ),
+
       body: Column(
         children: [
           Expanded(
@@ -235,6 +236,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                         },
                       ),
           ),
+
           if (replyingTo != null) ...[
             Container(
               padding: EdgeInsets.all(8),

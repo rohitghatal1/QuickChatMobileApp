@@ -29,6 +29,7 @@ class ChatBubble extends StatelessWidget {
             color: isMe ? Colors.blue : Colors.grey[300],
             borderRadius: BorderRadius.circular(12),
           ),
+
           child: Column(
             crossAxisAlignment:
                 isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,

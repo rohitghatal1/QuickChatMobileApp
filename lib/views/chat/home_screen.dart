@@ -127,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.search),
             onPressed: () {},
           ),
+
           PopupMenuButton(
             itemBuilder: (context) => [
               const PopupMenuItem(
@@ -142,6 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 value: 'logout',
               ),
             ],
+
             onSelected: (value) async {
               if (value == 'logout') {
                 await _handleLogout(context);
@@ -157,6 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _chatRooms.isEmpty

@@ -90,6 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Icons.arrow_forward_ios,
                       size: 16,
                     ),
+
                     onTap: () async {
                       final updated = Navigator.push(
                         context,
@@ -101,6 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                     },
                   ),
+
                   ListTile(
                     leading: Icon(Icons.person_outlined),
                     title: Text('Update Profile'),
