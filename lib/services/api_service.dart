@@ -49,7 +49,8 @@ class ApiService {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return responseBody;
     } else {
-      Fluttertoast.showToast(msg: responseBody['message'] ?? 'An error occurred');
+      Fluttertoast.showToast(
+          msg: responseBody['message'] ?? 'An error occurred');
       throw Exception(responseBody['message'] ?? 'Failed to load data');
     }
   }
