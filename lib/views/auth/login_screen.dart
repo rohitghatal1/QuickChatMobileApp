@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     try {
       final response =
-          await (await (MyDio().getDio())).post("/auth/login", data: {
+          await (await MyDio().getDio()).post("/auth/login", data: {
         "number": number,
         "password": _passwordController.text.trim(),
       });

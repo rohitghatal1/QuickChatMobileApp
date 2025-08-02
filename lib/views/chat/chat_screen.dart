@@ -105,6 +105,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       final dio = await MyDio().getDio();
       final response = await dio.get("/chat/room/$roomId/messages");
 
+      // bool isAtBottom = scrollController.position.pixels >= scrollController.position.maxScrollExtent - 50;
+
       // Parse the response
       final List<dynamic> messageList = response.data;
 
@@ -124,6 +126,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         _messages = messages.reversed.toList();
         _isLoading = false;
       });
+      // if(isAtBottom){
+      //   scrollToBottom();
+      // }
     } catch (e, stack) {
       print("Error in fetchMessages: $e\n$stack");
       setState(() => _isLoading = false);
@@ -218,6 +223,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                 : _messages.isEmpty
                     ? _buildEmptyChatState()
                     : ListView.builder(
+              controller: scrollController,
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final message = _messages[index];

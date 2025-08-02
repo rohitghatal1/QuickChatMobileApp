@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:quick_chat/provider/UserProvider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -10,6 +12,7 @@ import 'services/auth_service.dart';
 import 'services/socket_service.dart';
 import 'services/api_service.dart';
 import 'views/splash_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,11 +22,13 @@ void main() async {
   final apiService = ApiService();
   final authService = AuthService(sharedPreferences: sharedPreferences);
   final socketService = SocketService();
+  await Hive.initFlutter();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController(authService: authService, apiService: apiService)),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: MyApp(authService: authService),
     ),
@@ -43,6 +48,7 @@ class MyApp extends StatelessWidget {
       title: 'Chat App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        fontFamily: "Fredoka",
         primaryColor: Colors.teal,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         primarySwatch: Colors.blue,

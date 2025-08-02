@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../controllers/auth_controller.dart';
+import '../provider/UserProvider.dart';
 import '../utils/Dio/myDio.dart';
 import 'auth/login_screen.dart';
 import 'chat/home_screen.dart';
@@ -15,10 +16,19 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
+  List<dynamic>  currentUser = [];
   @override
   void initState() {
     super.initState();
+    initializeApp();
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkAuthStatus());
+  }
+
+  void initializeApp() async{
+    var provider = Provider.of<UserProvider>(context, listen: false);
+    provider.getConfig();
+    debugPrint("initialized user provider");
   }
 
   Future<void> _checkAuthStatus() async {
@@ -49,6 +59,20 @@ class _SplashScreenState extends State<SplashScreen> {
       );
     }
   }
+
+  // Future<void> getLoggedInUser() async {
+  //   try {
+  //     final dio = await MyDio().getDio();
+  //     final response = await dio.get("/users/auth/me");
+  //     setState(() {
+  //       currentUser = response.data;
+  //     });
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Failed to fetch current user data')),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

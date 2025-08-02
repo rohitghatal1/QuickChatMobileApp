@@ -3,8 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class MyDio {
   Future<Dio> getDio() async {
-    String apiUrl = "http://103.250.132.138:8886/api";
-    // String apiUrl = "http://192.168.18.31:5000/api";
+    // String apiUrl = "http://103.250.132.138:8886/api";
+    String apiUrl = "http://192.168.18.17:5000/api";
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? accessToken = await prefs.getString("quickChatAccessToken");
 

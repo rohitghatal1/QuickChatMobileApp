@@ -17,6 +17,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   List<User> users = [];
   List<String> selectedUserIds = [];
   bool isLoading = false;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -79,36 +80,50 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
         ),
         body: Padding(
           padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _groupNameController,
-                decoration: InputDecoration(labelText: "Group Name"),
-              ),
-              Expanded(
-                child: ListView(
-                  children: users.map((user) {
-                    return CheckboxListTile(
-                        title: Text(user.name!),
-                        value: selectedUserIds.contains(user.id),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value == true) {
-                              selectedUserIds.add(user.id!);
-                            } else {
-                              selectedUserIds.remove(user.id);
-                            }
-                          });
-                        });
-                  }).toList(),
+          child: Form(
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _groupNameController,
+                  decoration: InputDecoration(labelText: "Group Name"),
+                  validator: (value){
+                    if(value == null || value.isEmpty){
+                      return "Group name is mandatory";
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              ElevatedButton(
-                  onPressed: isLoading ? null : createGroup,
-                  child: isLoading
-                      ? CircularProgressIndicator()
-                      : Text('Create Group')),
-            ],
+                Expanded(
+                  child: ListView(
+                    children: users.map((user) {
+                      return CheckboxListTile(
+                          title: Text(user.name!),
+                          value: selectedUserIds.contains(user.id),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                selectedUserIds.add(user.id!);
+                              } else {
+                                selectedUserIds.remove(user.id);
+                              }
+                            });
+                          });
+                    }).toList(),
+                  ),
+                ),
+                ElevatedButton(
+                    onPressed: (){
+                      if(_formKey.currentState?.validate() ?? false){
+                        createGroup();
+                      }
+                    },
+                    child: isLoading
+                        ? CircularProgressIndicator()
+                        : Text('Create Group')),
+              ],
+            ),
           ),
         ));
   }

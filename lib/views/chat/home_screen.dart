@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:quick_chat/models/user.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
 import 'package:quick_chat/views/pages/create_group_page.dart';
+import '../../provider/UserProvider.dart';
 import '../../models/ChatRoom.dart';
 import '../auth/login_screen.dart';
 import '../pages/my_profile.dart';
@@ -21,7 +23,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<ChatRoom> _chatRooms = [];
   bool _isLoading = true;
-  late User currentUser;
+  var userData;
 
   final player = AudioPlayer();
   Map<String, String?> _previousLastMessageIds = {};
@@ -31,8 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchMyChatRooms();
-    getLoggedInUser();
     _fetchMyChatRooms();
 
     _chatRoomRefreshTimer = Timer.periodic(Duration(seconds: 5), (timer) {
@@ -46,19 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> getLoggedInUser() async {
-    try {
-      final dio = await MyDio().getDio();
-      final response = await dio.get("/users/auth/me");
-      setState(() {
-        currentUser = User.fromJson(response.data);
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to fetch current user data')),
-      );
-    }
-  }
+
 
   Future<void> _fetchMyChatRooms() async {
     try {
@@ -77,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
             final oldId = _previousLastMessageIds[room.id];
             if (oldId != null && oldId != lastMessageid) {
               await player
-                  .play(AssetSource("/sounds/vibratingReceiveSound.mp3"));
+                  .play(AssetSource("sounds/vibratingReceiveSound.mp3"));
             }
 
             _previousLastMessageIds[room.id] = lastMessageid;
@@ -105,11 +93,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (room.participants.length < 2) return null;
 
     // Assuming you have the current user's ID stored
-    if (currentUser.id == null) return null;
+    if (userData["_id"] == null) return null;
 
     try {
       return room.participants.firstWhere(
-        (user) => user.id != currentUser.id,
+        (user) => user.id != userData["_id"],
         orElse: () => room.participants.first,
       );
     } catch (e) {
@@ -119,6 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var userProvider = Provider.of<UserProvider>(context);
+    userData = userProvider.userData;
+    debugPrint("userData in home screen $userData");
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chats'),
