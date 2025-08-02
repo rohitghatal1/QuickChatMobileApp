@@ -21,7 +21,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<ChatRoom> _chatRooms = [];
+  List<dynamic> _chatRooms = [];
   bool _isLoading = true;
   var userData;
 
@@ -46,29 +46,24 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-
-
   Future<void> _fetchMyChatRooms() async {
     try {
       final dio = await MyDio().getDio();
       final response = await dio.get("/chat/room/getMyChatRooms");
 
       if (response.data != null) {
-        final List<ChatRoom> rooms = (response.data as List)
-            .map((json) => ChatRoom.fromJson(json))
-            .toList();
+        final List<dynamic> rooms = response.data;
 
         for (final room in rooms) {
-          final lastMessageid = room.lastMessage?.id;
+          final lastMessage = room['lastMessage'];
+          final lastMessageId = lastMessage != null ? lastMessage['_id'] : null;
 
-          if (lastMessageid != null) {
-            final oldId = _previousLastMessageIds[room.id];
-            if (oldId != null && oldId != lastMessageid) {
-              await player
-                  .play(AssetSource("sounds/vibratingReceiveSound.mp3"));
+          if (lastMessageId != null) {
+            final oldId = _previousLastMessageIds[room['_id']];
+            if (oldId != null && oldId != lastMessageId) {
+              await player.play(AssetSource("sounds/vibratingReceiveSound.mp3"));
             }
-
-            _previousLastMessageIds[room.id] = lastMessageid;
+            _previousLastMessageIds[room['_id']] = lastMessageId;
           }
         }
 
@@ -88,22 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Helper function to get the other participant in a 1:1 chat
-  User? _getOtherParticipant(ChatRoom room) {
-    if (room.participants.length < 2) return null;
-
-    // Assuming you have the current user's ID stored
-    if (userData["_id"] == null) return null;
-
-    try {
-      return room.participants.firstWhere(
-        (user) => user.id != userData["_id"],
-        orElse: () => room.participants.first,
-      );
-    } catch (e) {
-      return room.participants.isNotEmpty ? room.participants.first : null;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,51 +136,68 @@ class _HomeScreenState extends State<HomeScreen> {
               ? _buildEmptyState()
               : ListView.builder(
                   itemCount: _chatRooms.length,
-                  itemBuilder: (context, index) {
-                    final room = _chatRooms[index];
-                    final otherUser = _getOtherParticipant(room);
+          itemBuilder: (context, index) {
+            final room = _chatRooms[index];
+            final isGroup = room['isGroup'] ?? false;
+            final groupName = room['name'] ?? 'Group Chat';
+            List<dynamic> participants = room['participants'] ?? [];
+            final lastMessage = room['lastMessage'];
+            final receiver = lastMessage != null ? lastMessage['receiver'] : null;
 
-                    if (otherUser == null) {
-                      return const ListTile(
-                        title: Text('Unknown user'),
-                      );
-                    }
+            String displayName = 'Unknown';
 
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text(
-                          otherUser.username.isNotEmpty
-                              ? otherUser.username[0].toUpperCase()
-                              : '?',
-                        ),
-                      ),
-                      title: Text(room.isGroup
-                          ? "Group Chat"
-                          : otherUser.username.isNotEmpty
-                              ? otherUser.username
-                              : otherUser.name.isNotEmpty
-                                  ? otherUser.name
-                                  : 'Unknown'),
-                      subtitle: Text(
-                        room.lastMessage?.content ?? 'No messages yet',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ChatScreen(
-                              roomId: room.id,
-                              receiver: otherUser,
-                              isGroup: room.isGroup,
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+            if (isGroup) {
+              displayName = groupName;
+            } else {
+              final currentUserId = userData["_id"];
+              final otherUser = participants.firstWhere(
+                    (user) => user['_id'] != currentUserId,
+                orElse: () => null,
+              );
+
+              if (otherUser != null) {
+                displayName = otherUser['username'] ??
+                    otherUser['name'] ??
+                    (receiver != null ? receiver['username'] ?? 'Unknown' : 'Unknown');
+              } else if (receiver != null) {
+                displayName = receiver['username'] ?? 'Unknown';
+              }
+            }
+
+            final avatarText = (displayName is String && displayName.isNotEmpty)
+                ? displayName[0].toUpperCase()
+                : '?';
+
+            final subtitle = (lastMessage?['content'] ?? 'No messages yet') as String;
+
+            return ListTile(
+              leading: CircleAvatar(child: Text(avatarText)),
+              title: Text(displayName),
+              subtitle: Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onTap: () {
+                // In the HomeScreen's ListTile onTap, change this:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatScreen(
+                      roomId: room['_id'],
+                      receiver: isGroup
+                          ? null
+                          : (receiver),
+                      isGroup: isGroup,
+                      groupName: isGroup ? groupName : null, // Add this line
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+
+      ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.chat),
         onPressed: () {
@@ -238,7 +234,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _handleLogout(BuildContext context) async {
-    // Clear storage, token or auth info here if needed
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,

@@ -12,8 +12,8 @@ class NewChatScreen extends StatefulWidget {
 
 class _NewChatScreenState extends State<NewChatScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<User> _filteredUsers = [];
-  List<User> _allUsers = [];
+  List<dynamic> _filteredUsers = [];
+  List<dynamic> _allUsers = [];
   bool _isLoading = true;
 
   @override
@@ -27,9 +27,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
     try {
       final response = await (await (MyDio().getDio())).get("/users/getUsers");
       if (response.data != null) {
-        final List<User> users =
-            (response.data as List).map((json) => User.fromJson(json)).toList();
-
+        final List<dynamic> users = response.data;
         setState(() {
           _allUsers = users;
           _filteredUsers = users;

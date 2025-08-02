@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/message.dart';
+import '../config/serverTimeToLocal.dart';
 
 class ChatBubble extends StatelessWidget {
-  final Message message;
+  final dynamic message;
   final bool isMe;
 
   const ChatBubble({
@@ -15,8 +16,8 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formattedTime =
-        DateFormat('hh:mm a').format(message.createAt.toLocal());
+    final formattedTime = servertoLocalTime(message["createdAt"]);
+        // DateFormat('hh:mm a').format(message["createdAt"]);
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
@@ -35,14 +36,14 @@ class ChatBubble extends StatelessWidget {
                 isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
               Text(
-                message.content,
+                message["content"],
                 style: TextStyle(
                   color: isMe ? Colors.white : Colors.black,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                formattedTime,
+                servertoLocalTime(message["createdAt"]),
                 style: TextStyle(
                   color: isMe ? Colors.white70 : Colors.black54,
                   fontSize: 10,

@@ -41,6 +41,7 @@ dependencies:
   audioplayers: ^6.5.0
   hive_flutter: ^1.1.0
   hive: ^2.2.3
+  jiffy: ^6.4.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
