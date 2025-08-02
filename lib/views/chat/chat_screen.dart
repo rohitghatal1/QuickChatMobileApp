@@ -7,6 +7,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
+import 'package:quick_chat/views/pages/CallingPage.dart';
 
 import '../../provider/UserProvider.dart';
 import '../../widgets/chat_bubble.dart';
@@ -187,6 +188,15 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             Expanded(child: Text(displayName)),
           ],
         ),
+        actions: [
+          IconButton(onPressed: (){}, icon: Icon(Icons.call)),
+          IconButton(onPressed: (){
+            final storedIds = userData["_id"];
+            final callId = 'chat_$storedIds';
+
+            Navigator.push(context, MaterialPageRoute(builder: (_) => Callingpage(callId: callId)));
+          }, icon: Icon(Icons.videocam))
+        ],
       ),
       body: Column(
         children: [
