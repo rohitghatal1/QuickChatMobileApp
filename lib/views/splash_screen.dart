@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_chat/services/firebaseService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../controllers/auth_controller.dart';
@@ -27,7 +28,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void initializeApp() async{
     var provider = Provider.of<UserProvider>(context, listen: false);
-    provider.getConfig();
+    await provider.getConfig();
+    await FirebaseService.requestNotificationPermission();
+    var id = provider.userData["_id"];
+    debugPrint("provider data f $id");
+    FirebaseService.subscribeToTopic(id);
     debugPrint("initialized user provider");
   }
 

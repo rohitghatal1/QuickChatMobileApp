@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
+import 'package:quick_chat/views/splash_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../widgets/custom_button.dart';
@@ -21,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _numberController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isObscure = false;
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
@@ -44,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("quickChatAccessToken", token);
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => HomeScreen()),
+          MaterialPageRoute(builder: (_) => SplashScreen()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -83,6 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Image.asset("assets/images/quickChatImage.png", height: 120),
               SizedBox(height: 20),
               CustomTextField(
+                obscureText: _isObscure,
                 controller: _numberController,
                 label: 'Number',
                 validator: (value) {
@@ -91,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   }
                   return null;
                 },
+
               ),
               const SizedBox(height: 16),
               CustomTextField(

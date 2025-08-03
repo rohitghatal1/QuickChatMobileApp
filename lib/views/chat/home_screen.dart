@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_chat/models/user.dart';
+import 'package:quick_chat/services/firebaseService.dart';
 import 'package:quick_chat/services/socket_service.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
 import 'package:quick_chat/views/pages/create_group_page.dart';
@@ -48,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     });
   }
+
 
   @override
   void dispose() {
@@ -97,7 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     var userProvider = Provider.of<UserProvider>(context);
     userData = userProvider.userData;
-    debugPrint("userData in home screen $userData");
+    //
+
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chats'),

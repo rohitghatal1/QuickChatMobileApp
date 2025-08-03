@@ -1,8 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:quick_chat/provider/UserProvider.dart';
+import 'package:quick_chat/services/firebaseService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -23,6 +25,7 @@ void main() async {
   final authService = AuthService(sharedPreferences: sharedPreferences);
   final socketService = SocketService();
   await Hive.initFlutter();
+  await Firebase.initializeApp();
 
   runApp(
     MultiProvider(
@@ -37,13 +40,29 @@ void main() async {
 
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final AuthService authService;
 
   const MyApp({Key? key, required this.authService}) : super(key: key);
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FirebaseService.initializeLocalNotifications();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FirebaseService.setupFirebaseMessaging(context);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Chat App',
       debugShowCheckedModeBanner: false,
