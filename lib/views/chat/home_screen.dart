@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_chat/models/user.dart';
+import 'package:quick_chat/services/socket_service.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
 import 'package:quick_chat/views/pages/create_group_page.dart';
 import '../../provider/UserProvider.dart';
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _chatRooms = [];
   bool _isLoading = true;
   var userData;
+  late SocketService _socketService;
 
   final player = AudioPlayer();
   Map<String, String?> _previousLastMessageIds = {};
@@ -33,16 +35,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _initSocket();
     _fetchMyChatRooms();
 
-    _chatRoomRefreshTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-      _fetchMyChatRooms();
+  }
+
+  Future<void> _initSocket() async {
+    _socketService = await MyDio().getSocket();
+
+    _socketService.onReceiveMessage((_){
+        _fetchMyChatRooms();
+
     });
   }
 
   @override
   void dispose() {
-    _chatRoomRefreshTimer?.cancel();
+    // _socketService.dispose();
     super.dispose();
   }
 

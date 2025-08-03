@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_chat/services/socket_service.dart';
 import 'package:quick_chat/utils/Dio/myDio.dart';
 import 'package:quick_chat/views/pages/CallingPage.dart';
 
@@ -40,6 +41,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Timer? _messageRefreshTimer;
   dynamic replyingTo;
 
+  late SocketService _socketService;
+
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   double _dragExtent = 0.0;
@@ -49,7 +52,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     scrollToBottom();
+    _initSocket(); // Initialize socket connection
 
+    // Keep animation setup (unrelated to sockets)
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
@@ -62,12 +67,23 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
-    _messageRefreshTimer = Timer.periodic(
-      const Duration(seconds: 3),
-          (timer) => fetchMessages(widget.roomId),
-    );
+    // Fetch initial messages (only once, no more polling)
+    fetchMessages(widget.roomId);
 
+    // Scroll to bottom after first render
     WidgetsBinding.instance.addPostFrameCallback((_) => scrollToBottom());
+  }
+
+  Future<void> _initSocket() async {
+    _socketService = await MyDio().getSocket();
+    _socketService.joinRoom(widget.roomId);
+
+    _socketService.onReceiveMessage((newMessage){
+      setState(() {
+        _messages.add(newMessage);
+      });
+      scrollToBottom();
+    });
   }
 
   void _onHorizontalDragUpdate(DragUpdateDetails details, dynamic message) {
@@ -115,35 +131,64 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
 
-    try {
-      final dio = await MyDio().getDio();
-      final sendMsgUrl = widget.isGroup
-          ? "/groups/sendGroupMessage"
-          : "/chat/sendMessage";
+    // Optimistic UI update (message appears instantly)
+    final tempMessage = {
+      '_id': 'temp-${DateTime.now().millisecondsSinceEpoch}',
+      'content': content,
+      'sender': {'_id': userData["_id"]},
+      'createdAt': DateTime.now().toIso8601String(),
+    };
 
-      final dataToSend = {
-        "roomId": widget.roomId,
-        "content": content,
-        if (widget.isGroup) "senderId": userData["_id"],
-      };
+    setState(() {
+      _messages.add(tempMessage);
+    });
+    _messageController.clear();
+    scrollToBottom();
+    await player.play(AssetSource('sounds/sendMsgPopSound.mp3'));
 
-      final response = await dio.post(sendMsgUrl, data: dataToSend);
-
-      _messageController.clear();
-      await player.play(AssetSource('sounds/sendMsgPopSound.mp3'));
-
-      setState(() {
-        _messages.add(response.data);
-      });
-
-      scrollToBottom();
-    } catch (e) {
-      debugPrint("Message sending error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot send message')),
-      );
-    }
+    // Send via Socket.io (no need for HTTP)
+    _socketService.sendMessage(
+      roomId: widget.roomId,
+      content: content,
+      senderId: userData["_id"],
+    );
   }
+
+  // Future<void> _sendMessage() async {
+  //   final content = _messageController.text.trim();
+  //   if (content.isEmpty) return;
+  //
+  //   _socketService.sendMessage(roomId: widget.roomId, content: content, senderId: userData["_id"]);
+  //
+  //   try {
+  //     final dio = await MyDio().getDio();
+  //     final sendMsgUrl = widget.isGroup
+  //         ? "/groups/sendGroupMessage"
+  //         : "/chat/sendMessage";
+  //
+  //     final dataToSend = {
+  //       "roomId": widget.roomId,
+  //       "content": content,
+  //       if (widget.isGroup) "senderId": userData["_id"],
+  //     };
+  //
+  //     final response = await dio.post(sendMsgUrl, data: dataToSend);
+  //
+  //     _messageController.clear();
+  //     await player.play(AssetSource('sounds/sendMsgPopSound.mp3'));
+  //
+  //     setState(() {
+  //       _messages.add(response.data);
+  //     });
+  //
+  //     scrollToBottom();
+  //   } catch (e) {
+  //     debugPrint("Message sending error: $e");
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Cannot send message')),
+  //     );
+  //   }
+  // }
 
   void scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -162,6 +207,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _messageController.dispose();
     _messageRefreshTimer?.cancel();
     _controller.dispose();
+    // _socketService.dispose();
     super.dispose();
   }
 
@@ -173,7 +219,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
     final displayName = widget.isGroup
         ? (widget.groupName ?? "Group Chat")
-        : (widget.receiver["username"] ?? 'Chat');
+        : (widget.receiver?["username"] ?? 'Chat');
 
     debugPrint("receiver data in chat screen ${widget.isGroup ? widget.groupName : widget.receiver }");
 

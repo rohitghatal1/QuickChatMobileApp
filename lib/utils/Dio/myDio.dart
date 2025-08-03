@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:quick_chat/services/socket_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyDio {
@@ -42,5 +43,13 @@ class MyDio {
     ));
 
     return dio;
+  }
+
+  Future<SocketService> getSocket() async{
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("quickChatAccessToken") ?? '';
+    final socketService = SocketService();
+    socketService.initSocket(token);
+    return socketService;
   }
 }

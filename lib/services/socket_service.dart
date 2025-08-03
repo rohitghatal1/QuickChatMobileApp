@@ -1,57 +1,49 @@
-import 'package:socket_io_client/socket_io_client.dart' as io;
-import 'package:fluttertoast/fluttertoast.dart';
-
-import '../config/constants.dart';
-import '../models/message.dart';
-import '../models/user.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketService {
-  late io.Socket socket;
-  Function(Message)? onMessageReceived;
+  late IO.Socket socket;
 
-  void initializeSocket(String token) {
-    socket = io.io(
-      AppConstants.socketUrl,
-      io.OptionBuilder()
+  // Initialize socket connection
+  void initSocket(String token) {
+    socket = IO.io(
+      'http://192.168.18.17:5000', // Match your backend URL
+      IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
           .setExtraHeaders({'Authorization': 'Bearer $token'})
           .build(),
     );
 
-    socket.onConnect((_) {
-      print('Socket connected');
-    });
-
-    socket.onDisconnect((_) {
-      print('Socket disconnected');
-    });
-
-    socket.onError((error) {
-      Fluttertoast.showToast(msg: 'Socket error: $error');
-    });
-
-    socket.on('receiveMessage', (data) {
-      if (onMessageReceived != null) {
-        final message = Message.fromJson(data);
-        onMessageReceived!(message);
-      }
-    });
+    socket.onConnect((_) => print('Socket connected!'));
+    socket.onDisconnect((_) => print('Socket disconnected'));
   }
 
-  void joinConversation(String userId) {
-    socket.emit('joinConversation', {'userId': userId});
+  // Join a chat room
+  void joinRoom(String roomId) {
+    socket.emit('join_room', roomId);
   }
 
+  // Send a message
   void sendMessage({
-    required String token,
-    required String receiverId,
+    required String roomId,
     required String content,
+    required String senderId,
   }) {
-    socket.emit('sendMessage', {token, receiverId, content});
+    socket.emit('send_message', {
+      'roomId': roomId,
+      'content': content,
+      'senderId': senderId,
+    });
   }
 
-  void disconnect() {
+  // Listen for incoming messages
+  void onReceiveMessage(Function(dynamic) callback) {
+    socket.on('receive_message', (data) => callback(data));
+  }
+
+  // Cleanup
+  void dispose() {
     socket.disconnect();
+    socket.off('receive_message');
   }
 }
