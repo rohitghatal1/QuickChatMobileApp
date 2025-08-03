@@ -63,11 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 spacing: 20,
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                        AssetImage('assets/images/quickChatImage.png'),
-                  ),
+                  Text(user!['name'][0], style: TextStyle(fontSize: 25),),
                   Text(
                     user!['name'] ?? '',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(

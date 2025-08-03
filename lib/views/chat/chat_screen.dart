@@ -173,7 +173,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
     final displayName = widget.isGroup
         ? (widget.groupName ?? "Group Chat")
-        : (widget.receiver ?? 'Chat');
+        : (widget.receiver["username"] ?? 'Chat');
+
+    debugPrint("receiver data in chat screen ${widget.isGroup ? widget.groupName : widget.receiver }");
 
     return Scaffold(
       appBar: AppBar(

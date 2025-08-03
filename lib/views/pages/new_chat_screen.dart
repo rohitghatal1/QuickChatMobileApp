@@ -47,7 +47,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
     setState(() {
       _filteredUsers = _allUsers.where((user) {
-        return user.username.toLowerCase().contains(query);
+        return user["username"].toLowerCase().contains(query);
       }).toList();
       _isLoading = false;
     });
@@ -107,14 +107,15 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         itemCount: _filteredUsers.length,
                         itemBuilder: (context, index) {
                           final user = _filteredUsers[index];
+                          debugPrint("user data of index: ${user}");
                           return ListTile(
                             leading: CircleAvatar(
-                              child: Text(user.username[0].toUpperCase()),
+                              child: Text(user["username"][0].toUpperCase()),
                             ),
-                            title: Text(user.username),
-                            subtitle: Text(user.email),
+                            title: Text(user["username"]),
+                            subtitle: Text(user["email"]),
                             onTap: () async {
-                              final roomId = await getOrCreateRoom(user.id);
+                              final roomId = await getOrCreateRoom(user["_id"]);
                               if (roomId != null) {
                                 Navigator.push(
                                   context,
