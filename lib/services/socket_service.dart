@@ -41,6 +41,7 @@ class SocketService {
     socket.on('receive_message', (data) => callback(data));
   }
 
+
   // Cleanup
   void dispose() {
     socket.disconnect();
