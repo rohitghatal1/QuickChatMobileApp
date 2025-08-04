@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _chatRooms = [];
   bool _isLoading = true;
   var userData;
-  late SocketService _socketService;
+  SocketService? _socketService;
 
   final player = AudioPlayer();
   Map<String, String?> _previousLastMessageIds = {};
@@ -38,23 +38,27 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _initSocket();
     _fetchMyChatRooms();
-
+    _chatRoomRefreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      _fetchMyChatRooms();
+    });
   }
 
   Future<void> _initSocket() async {
     _socketService = await MyDio().getSocket();
-    _socketService.onReceiveMessage((_) async{
-      await _fetchMyChatRooms();
-      setState(() {
-
-      });
+    _socketService?.onReceiveMessage((_) async{
+      if (mounted) {
+        await _fetchMyChatRooms();
+        setState(() {});
+      }
     });
   }
 
 
+
   @override
   void dispose() {
-    // _socketService.dispose();
+    _socketService?.dispose();
+    _chatRoomRefreshTimer?.cancel();
     super.dispose();
   }
 

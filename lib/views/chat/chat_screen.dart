@@ -41,12 +41,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Timer? _messageRefreshTimer;
   dynamic replyingTo;
 
-  late SocketService _socketService;
+  SocketService? _socketService;
 
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   double _dragExtent = 0.0;
   bool _isReplyTriggered = false;
+  bool _isSocketInitialized = false;
 
   @override
   void initState() {
@@ -75,16 +76,40 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _initSocket() async {
-    _socketService = await MyDio().getSocket();
-    _socketService.joinRoom(widget.roomId);
+    try {
+      if (_isSocketInitialized) return;
 
-    _socketService.onReceiveMessage((newMessage){
-      setState(() {
-        _messages.add(newMessage);
+      _socketService = await MyDio().getSocket();
+      _socketService?.joinRoom(widget.roomId);
+
+      _socketService?.onReceiveMessage((newMessage) {
+        if (mounted) {
+          setState(() {
+            _messages.add(newMessage);
+          });
+          scrollToBottom();
+        }
       });
-      scrollToBottom();
-    });
+
+      _isSocketInitialized = true;
+    } catch (e) {
+      debugPrint("Socket initialization error: $e");
+    }
   }
+
+
+
+// Override didChangeDependencies to reinitialize socket when returning to screen
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reinitialize socket connection when returning to this screen
+    if (!_isSocketInitialized) {
+      _initSocket();
+    }
+
+  }
+
 
   void _onHorizontalDragUpdate(DragUpdateDetails details, dynamic message) {
     _dragExtent += details.primaryDelta ?? 0;
@@ -117,6 +142,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         _messages = messageList.reversed.toList();
         _isLoading = false;
       });
+      // await player.play(AssetSource('sounds/incomingsound.mp3'));
+
       scrollToBottom();
     } catch (e) {
       debugPrint("Error in fetchMessages: $e");
@@ -131,23 +158,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
 
-    // Optimistic UI update (message appears instantly)
-    final tempMessage = {
-      '_id': 'temp-${DateTime.now().millisecondsSinceEpoch}',
-      'content': content,
-      'sender': {'_id': userData["_id"]},
-      'createdAt': DateTime.now().toIso8601String(),
-    };
-
-    setState(() {
-      _messages.add(tempMessage);
-    });
     _messageController.clear();
     scrollToBottom();
     await player.play(AssetSource('sounds/sendMsgPopSound.mp3'));
 
     // Send via Socket.io (no need for HTTP)
-    _socketService.sendMessage(
+    _socketService?.sendMessage(
       roomId: widget.roomId,
       content: content,
       senderId: userData["_id"],
@@ -207,8 +223,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _messageController.dispose();
     _messageRefreshTimer?.cancel();
     _controller.dispose();
+    _socketService?.leaveRoom(widget.roomId);
+    _isSocketInitialized = false;
     // _socketService.dispose();
     super.dispose();
+
+
   }
 
   @override
@@ -236,15 +256,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             Expanded(child: Text(displayName)),
           ],
         ),
-        actions: [
-          IconButton(onPressed: (){}, icon: Icon(Icons.call)),
-          IconButton(onPressed: (){
-            final storedIds = userData["_id"];
-            final callId = 'chat_$storedIds';
-
-            Navigator.push(context, MaterialPageRoute(builder: (_) => Callingpage(callId: callId)));
-          }, icon: Icon(Icons.videocam))
-        ],
       ),
       body: Column(
         children: [

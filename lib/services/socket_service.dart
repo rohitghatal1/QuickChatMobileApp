@@ -38,7 +38,12 @@ class SocketService {
 
   // Listen for incoming messages
   void onReceiveMessage(Function(dynamic) callback) {
-    socket.on('receive_message', (data) => callback(data));
+    socket.off('receive_message');
+    socket.on('receive_message', callback);
+  }
+
+  void leaveRoom(String roomId) {
+    socket?.emit('leave_room', roomId);
   }
 
 

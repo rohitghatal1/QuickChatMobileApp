@@ -118,12 +118,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                     },
                   ),
-                  ListTile(
-                    leading: Icon(Icons.settings),
-                    title: Text('Settings'),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {},
-                  ),
                   ElevatedButton.icon(
                       icon: Icon(Icons.logout),
                       label: Text('Logout'),
